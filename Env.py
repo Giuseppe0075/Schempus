@@ -50,13 +50,3 @@ class Timetable:
                 day_result.append(str(classroom))
             result.append(day_result)
         return tabulate(result, tablefmt="plain")
-
-if __name__ == "__main__":
-    c1 = Course("ETC", "di nucci", 100, 8)
-    c2 = Course("Math", "smith", 50,8)
-    c3 = Course("Physics", "johnson", 75,8)
-    d = Classroom("p1", 200)
-    e = Classroom("p2", 100)
-    time_table = Timetable([d,e])
-    time_table.first_initialization([c1,c2,c3])
-    print(time_table)
