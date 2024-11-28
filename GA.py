@@ -58,10 +58,10 @@ def fitness(_agent: Timetable):
 
     def count_collisions(agent):
         collisions = 0
-        for course in agent.timetable:
-            for lesson in course:
-                if course.count(lesson) > 1:
-                    collisions += 1
+        lessons = [lesson for course in agent.timetable for lesson in course]
+        for lesson in lessons :
+            if lessons.count(lesson) > 1 :
+                collisions += 1
         return collisions
 
     def count_professor_conflicts(agent):
