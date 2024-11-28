@@ -52,5 +52,26 @@ def selection(agents: list, k, m):
 
     return winners, winners_fits
 
-def fitness(agent: Timetable):
-    return 1
+def fitness(_agent: Timetable):
+    #calculate the fitness of the agent
+    fit = 0
+
+    def count_collisions(agent):
+        collisions = 0
+        for course in agent.timetable:
+            for lesson in course:
+                if course.count(lesson) > 1:
+                    collisions += 1
+        return collisions
+
+    def count_professor_conflicts(agent):
+        pass
+
+    def check_capacity(agent):
+        pass
+
+    def check_distribution(agent):
+        pass
+
+    fit -= count_collisions(_agent) * 100
+    return fit
