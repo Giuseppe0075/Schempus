@@ -92,13 +92,15 @@ def selection(agents: list, k, m):
         winners_fits.append(selected_agents_fits[selected_agents.index(selected_agent)])
     return winners, winners_fits
 
-def fitness(_agent: Timetable):
+def fitness(agent: Timetable):
     #calculate the fitness of the agent
-    conflicts_weight = 2
-    collisions_weight = 2
+    conflicts_weight = 100
+    collisions_weight = 100
     capacity_weight = 1
+    distribution_weight = 5
+    distribution_in_day_weight = 5
 
-    def count_collisions(agent):
+    def count_collisions():
         collisions = 0
         lessons = [lesson for course in agent.timetable for lesson in course]
         for lesson in lessons :
@@ -107,7 +109,7 @@ def fitness(_agent: Timetable):
         return collisions
 
     #A Professor should not have two lessons at the same time
-    def count_professor_conflicts(agent):
+    def count_professor_conflicts():
         conflicts = 0
         professors = set([course.professor for course in agent.courses])
         for professor in professors:
@@ -119,7 +121,7 @@ def fitness(_agent: Timetable):
         return conflicts
 
     #If a course doesn't match the classroom capacity, the fitness should be increased
-    def capacity_error(agent):
+    def capacity_error():
         total_error = 0
         course_objects = agent.courses
         classrooms = agent.classrooms
@@ -136,12 +138,36 @@ def fitness(_agent: Timetable):
         return total_error
 
 
-    def check_distribution(agent):
-        pass
+    def check_hours_per_day():
+        total_error = 0
+        courses_object = agent.courses
+        courses = agent.timetable
+        for course in courses:
+            course_index = courses.index(course)
+            hours_goal = courses_object[course_index].preferred_hours_a_day
+            for day in range(5):
+                lessons = [lesson for lesson in course if lesson[0] == day]
+                if len(lessons) == 0:
+                    continue
+                hours = len(lessons)
+                total_error += abs(hours - hours_goal)
+        return total_error
 
-    n_collisions = count_collisions(_agent) # * 100
-    n_conflicts = count_professor_conflicts(_agent) # * 100
-    capacity_err = capacity_error(_agent) # * 10
-    fit = n_collisions * collisions_weight + n_conflicts * conflicts_weight + capacity_err * capacity_weight
-    print(f"fit: {fit} <- collisions: {n_collisions}, conflicts: {n_conflicts}, capacity_error: {capacity_error(_agent)}")
+    def check_distribution_in_day():
+        total_error = 0
+        for day in range(5) :
+            for course in agent.timetable :
+                hours = [lesson[2] for lesson in course if lesson[0] == day]
+                if hours :
+                    total_error += max(hours) - min(hours)
+        return total_error
+
+    fit_collisions = count_collisions() * collisions_weight
+    fit_professor_conflicts = count_professor_conflicts() * conflicts_weight
+    fit_capacity = capacity_error() * capacity_weight
+    fit_hours_per_day = check_hours_per_day() * distribution_weight
+    fit_distribution_in_day = check_distribution_in_day() * distribution_in_day_weight
+
+    fit = fit_collisions + fit_professor_conflicts + fit_capacity + fit_hours_per_day + fit_distribution_in_day
+    print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, hours per day: {fit_hours_per_day}, distribution in day: {fit_distribution_in_day}")
     return fit
