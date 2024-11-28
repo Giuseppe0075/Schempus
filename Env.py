@@ -3,12 +3,13 @@ from tabulate import tabulate
 class Course:
     """This class represents a course in a university"""
 
-    def __init__(self, name, professor, number_of_students, hours_for_week):
+    def __init__(self, name, professor, number_of_students, hours_for_week, preferred_hours_a_day=2):
         """"This method initializes the course with the given name, professor, number of students for this particular course and hours for week"""
         self.name = name
         self.professor = professor
         self.number_of_students = number_of_students
         self.hours_for_week = hours_for_week
+        self.preferred_hours_a_day = preferred_hours_a_day
 
     def __str__(self):
         return f"{self.name} by {self.professor}"
