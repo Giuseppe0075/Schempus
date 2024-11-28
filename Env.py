@@ -1,7 +1,10 @@
 from tabulate import tabulate
 
 class Course:
+    """This class represents a course in a university"""
+
     def __init__(self, name, professor, number_of_students, hours_for_week):
+        """"This method initializes the course with the given name, professor, number of students for this particular course and hours for week"""
         self.name = name
         self.professor = professor
         self.number_of_students = number_of_students
@@ -12,21 +15,25 @@ class Course:
 
 
 class Classroom:
+    """This class represents a classroom in a university"""
     def __init__(self, name, capacity):
+        """This method initializes the classroom with the given name and capacity"""
         self.name = name
         self.capacity = capacity
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.name}: {self.capacity}"
 
 class Timetable:
     """This class represents the timetable of a university"""
 
     def __init__(self, classrooms, courses):
+        """This method initializes the timetable with a list of Classroom and a list of Course"""
         import random as rd
         self.classrooms = classrooms
         self.courses = courses
         self.timetable = []
+        # Generate a random timetable
         for course in courses:
             _course = []
             for _ in range(course.hours_for_week):
