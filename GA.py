@@ -39,8 +39,10 @@ def selection(agents: list, k, m):
         #select k agents at random
         selected_agents = []
         selected_agents_fits = []
+        available_indices = list(range(len(agents)))
         for _ in range(k) :
-            i = rd.randint(0, len(agents) - 1)
+            i = rd.choice(available_indices)
+            available_indices.remove(i)
             selected_agents.append(agents[i])
             selected_agents_fits.append(fits[i])
         #select the best agent
