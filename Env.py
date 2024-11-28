@@ -15,38 +15,38 @@ class Classroom:
     def __init__(self, name, capacity):
         self.name = name
         self.capacity = capacity
-        self.hours = [None] * 8
 
     def __str__(self):
-        return f"{self.name}" + str([str(hour) if hour is not None else "None" for hour in self.hours])
+        return f"{self.name}"
 
 class Timetable:
     """This class represents the timetable of a university"""
 
-    def __init__(self, classrooms):
-        self.classrooms = classrooms
-        self.timetable = [[Classroom(classroom.name, classroom.capacity) for classroom in classrooms] for _ in range(5)]
-
-    def first_initialization(self, courses: list):
+    def __init__(self, classrooms, courses):
         import random as rd
-        slots = [(day, hour, classroom) for day in range(5) for classroom in range(len(self.classrooms)) for hour in
-                 range(8)]
-        rd.shuffle(slots)
-
-        for course in courses :
-            for _ in range(course.hours_for_week) :
-                if slots :
-                    day, hour, classroom_index = slots.pop()
-                    classroom = self.timetable[day][classroom_index]
-                    classroom.hours[hour] = course
-                else :
-                    raise ValueError("Not enough slots available to schedule all courses")
+        self.classrooms = classrooms
+        self.courses = courses
+        self.timetable = []
+        for course in courses:
+            _course = []
+            for _ in range(course.hours_for_week):
+                _course.append([rd.randint(0, 4), rd.randint(0, len(classrooms)-1), rd.randint(0, 7)]) #[day, classroom, hour]
+            self.timetable.append(_course)
 
     def __str__(self):
         result = []
-        for day_index, day in enumerate(self.timetable) :
-            day_result = [f"Day {day_index + 1}"]
-            for classroom in day :
-                day_result.append(str(classroom))
-            result.append(day_result)
+        for course in self.timetable:
+            result.append(str(lesson) for lesson in course)
         return tabulate(result, tablefmt="plain")
+
+    # This method prints the timetable as a table where the rows are the days, the columns are the classrooms and the cells are the hours
+    def display_as_table(self) :
+        table = [["" for _ in range(len(self.classrooms))] for _ in range(5)]
+        for course in self.timetable :
+            print(f"id: {self.timetable.index(course)} " + str(self.courses[self.timetable.index(course)]))
+            for lesson in course :
+                day, classroom, hour = lesson
+                table[day][
+                    classroom] += f"{hour + 1}: {self.courses[self.timetable.index(course)].name} (ID: {self.timetable.index(course)})\n"
+        print(tabulate(table, headers=[classroom.name for classroom in self.classrooms],
+                       showindex=["Mon", "Tue", "Wed", "Thu", "Fri"], tablefmt="grid"))
