@@ -5,10 +5,9 @@ import random as rd
 
 def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
     n_agents = len(agents)
-    fits = []
     best_agent = agents[0]
     best_fit = fitness(agents[0])
-    while best_fit > 0:
+    for _ in range(generations):
         # Select agents
         agents, fits = selection(agents, k, m)
 
@@ -31,7 +30,7 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
         # Mutation
         for agent in new_agents:
             if rd.random() < mutation_rate:
-                mutation(agent)
+                mutation(agent, number_of_mutations=rd.randint(1, 5))
 
         agents = new_agents
 
@@ -95,7 +94,9 @@ def selection(agents: list, k, m):
 
 def fitness(_agent: Timetable):
     #calculate the fitness of the agent
-    fit = 0
+    conflicts_weight = 2
+    collisions_weight = 2
+    capacity_weight = 1
 
     def count_collisions(agent):
         collisions = 0
@@ -107,16 +108,40 @@ def fitness(_agent: Timetable):
 
     #A Professor should not have two lessons at the same time
     def count_professor_conflicts(agent):
-        pass
+        conflicts = 0
+        professors = set([course.professor for course in agent.courses])
+        for professor in professors:
+            lessons = [lesson for course in agent.timetable for lesson in course if agent.courses[agent.timetable.index(course)].professor == professor]
+            for lesson in lessons:
+                if lessons.count(lesson) > 1:
+                    conflicts += 1
 
+        return conflicts
 
-    def check_capacity(agent):
-        pass
+    #If a course doesn't match the classroom capacity, the fitness should be increased
+    def capacity_error(agent):
+        total_error = 0
+        course_objects = agent.courses
+        classrooms = agent.classrooms
+        courses = agent.timetable
+        for course in courses:
+            course_index = courses.index(course)
+            course_students = course_objects[course_index].number_of_students
+            for lesson in course:
+                class_capacity = classrooms[lesson[1]].capacity
+                error = class_capacity - course_students
+                if error < 0: error *= -2
+                total_error += error
+
+        return total_error
+
 
     def check_distribution(agent):
         pass
 
-    n_collisions = count_collisions(_agent)
-    fit = n_collisions * 100
-    print(f"fit: {fit} <- collisions: {n_collisions}")
+    n_collisions = count_collisions(_agent) # * 100
+    n_conflicts = count_professor_conflicts(_agent) # * 100
+    capacity_err = capacity_error(_agent) # * 10
+    fit = n_collisions * collisions_weight + n_conflicts * conflicts_weight + capacity_err * capacity_weight
+    print(f"fit: {fit} <- collisions: {n_collisions}, conflicts: {n_conflicts}, capacity_error: {capacity_error(_agent)}")
     return fit
