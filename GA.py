@@ -160,10 +160,12 @@ def fitness(agent: Timetable):
         total_error = 0
         for day in range(5) :
             for course in agent.timetable :
-                hours = [lesson[2] for lesson in course if lesson[0] == day]
+                hours = set(lesson[2] for lesson in course if lesson[0] == day)
                 if hours :
-                    total_error += max(hours) - min(hours)
+                    total_error += max(hours) - min(hours) - len(hours) + 1
+
         return total_error
+
 
     fit_collisions = count_collisions() * collisions_weight
     fit_professor_conflicts = count_professor_conflicts() * conflicts_weight
