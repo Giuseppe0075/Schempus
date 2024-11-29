@@ -104,6 +104,7 @@ def fitness(agent: Timetable):
     distribution_weight = 5
     distribution_in_day_weight = 5
 
+    #There should not be more lessons in the same classroom at the same time
     def count_collisions():
         collisions = 0
         lessons = [lesson for course in agent.timetable for lesson in course]
@@ -112,7 +113,7 @@ def fitness(agent: Timetable):
                 collisions += 1
         return collisions
 
-    #A Professor should not have two lessons at the same time
+    #A Professor should not have two different lessons at the same time
     def count_professor_conflicts():
         conflicts = 0
         professors = set([course.professor for course in agent.courses])
@@ -126,7 +127,7 @@ def fitness(agent: Timetable):
 
         return conflicts
 
-    #If a course doesn't match the classroom capacity, the fitness should be increased
+    #The number of students in a classroom should not exceed its capacity
     def capacity_error():
         total_error = 0
         course_objects = agent.courses
@@ -143,8 +144,8 @@ def fitness(agent: Timetable):
 
         return total_error
 
-
-    def check_hours_per_day():
+    #Each course should follow a preferred number of hours per day
+    def check_week_distribution():
         total_error = 0
         courses_object = agent.courses
         courses = agent.timetable
@@ -159,7 +160,8 @@ def fitness(agent: Timetable):
                 total_error += abs(hours - hours_goal)
         return total_error
 
-    def check_distribution_in_day():
+    #It is preferred that a course have consecutive hours in the same classroom
+    def check_day_distribution():
         total_error = 0
         for day in range(5) :
             for course in agent.timetable :
@@ -175,8 +177,8 @@ def fitness(agent: Timetable):
     fit_collisions = count_collisions() * collisions_weight
     fit_professor_conflicts = count_professor_conflicts() * conflicts_weight
     fit_capacity = capacity_error() * capacity_weight
-    fit_hours_per_day = check_hours_per_day() * distribution_weight
-    fit_distribution_in_day = check_distribution_in_day() * distribution_in_day_weight
+    fit_hours_per_day = check_week_distribution() * distribution_weight
+    fit_distribution_in_day = check_day_distribution() * distribution_in_day_weight
 
     fit = fit_collisions + fit_professor_conflicts + fit_capacity + fit_hours_per_day + fit_distribution_in_day
     print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, hours per day: {fit_hours_per_day}, distribution in day: {fit_distribution_in_day}")
