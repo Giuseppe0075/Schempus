@@ -19,6 +19,7 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
                 with open("best_agent.txt", "w") as f:
                     f.write(str(best_fit)+"\n")
                     f.write(best_agent.display_as_table())
+                    f.write("\n" + str(best_agent))
 
         # Crossover
         new_agents = []
@@ -118,8 +119,10 @@ def fitness(agent: Timetable):
         for professor in professors:
             lessons = [lesson for course in agent.timetable for lesson in course if agent.courses[agent.timetable.index(course)].professor == professor]
             for lesson in lessons:
-                if lessons.count(lesson) > 1:
-                    conflicts += 1
+                day, classroom, hour = lesson
+                for other_lesson in lessons:
+                    if other_lesson[0] == day and other_lesson[2] == hour and other_lesson[1] != classroom:
+                        conflicts += 1
 
         return conflicts
 
@@ -163,9 +166,11 @@ def fitness(agent: Timetable):
                 hours = set(lesson[2] for lesson in course if lesson[0] == day)
                 if hours :
                     total_error += max(hours) - min(hours) - len(hours) + 1
+                classes = set(lesson[1] for lesson in course if lesson[0] == day)
+                if classes :
+                    total_error += len(classes) - 1
 
         return total_error
-
 
     fit_collisions = count_collisions() * collisions_weight
     fit_professor_conflicts = count_professor_conflicts() * conflicts_weight

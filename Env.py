@@ -47,6 +47,10 @@ class Timetable:
             result.append(str(lesson) for lesson in course)
         return tabulate(result, tablefmt="plain")
 
+    def test(self, timetable):
+        self.timetable = timetable
+
+
     # This method prints the timetable as a table where the rows are the days, the columns are the classrooms and the cells are the hours
     def display_as_table(self):
         table = [["" for _ in range(len(self.classrooms))] for _ in range(5)]
