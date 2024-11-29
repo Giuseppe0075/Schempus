@@ -16,6 +16,9 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
             if fit < best_fit:
                 best_agent = copy.deepcopy(agent)
                 best_fit = copy.deepcopy(fit)
+                with open("best_agent.txt", "w") as f:
+                    f.write(str(best_fit)+"\n")
+                    f.write(best_agent.display_as_table())
 
         # Crossover
         new_agents = []
@@ -131,8 +134,8 @@ def fitness(agent: Timetable):
             course_students = course_objects[course_index].number_of_students
             for lesson in course:
                 class_capacity = classrooms[lesson[1]].capacity
-                error = class_capacity - course_students
-                if error < 0: error *= -2
+                error = course_students - class_capacity
+                if error < 0: error = 0
                 total_error += error
 
         return total_error

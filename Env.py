@@ -70,5 +70,5 @@ class Timetable:
                 lessons.sort(key=lambda x: int(x.split(':')[0]))
                 table[day][classroom] = '\n'.join(lessons)
 
-        print(tabulate(table, headers=[classroom.name for classroom in self.classrooms],
-                       showindex=["Mon", "Tue", "Wed", "Thu", "Fri"], tablefmt="grid"))
+        return tabulate(table, headers=[classroom.name for classroom in self.classrooms],
+                       showindex=["Mon", "Tue", "Wed", "Thu", "Fri"], tablefmt="grid")
