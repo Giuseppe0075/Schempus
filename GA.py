@@ -1,13 +1,15 @@
 import copy
-
-from Env import Timetable
 import random as rd
+from Env import Timetable
 
 def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
     n_agents = len(agents)
     best_agent = agents[0]
     best_fit = fitness(agents[0])
-    for _ in range(generations):
+    best_fitness_values = []
+
+    for i in range(generations):
+        print(f"{int(i/generations * 100)}%")
         # Select agents
         agents, fits = selection(agents, k, m)
 
@@ -17,9 +19,11 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
                 best_agent = copy.deepcopy(agent)
                 best_fit = copy.deepcopy(fit)
                 with open("best_agent.txt", "w") as f:
-                    f.write(str(best_fit)+"\n")
+                    f.write(str(best_fit) + "\n")
                     f.write(best_agent.display_as_table())
                     f.write("\n" + str(best_agent))
+
+        best_fitness_values.append(best_fit)
 
         # Crossover
         new_agents = []
@@ -38,7 +42,10 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
 
         agents = new_agents
 
-    return best_agent, best_fit
+    # Normalize the fitness values
+    normalized_fitness_values = [(fit - 0) / (5000 - 0) for fit in best_fitness_values]
+
+    return  best_agent, best_fit,normalized_fitness_values
 
 def mutation(agent: Timetable, number_of_mutations=1):
     for _ in range(number_of_mutations):
@@ -77,31 +84,34 @@ def selection(agents: list, k, m):
     #select m agents
     winners = []
     winners_fits = []
+
+    #select m agents
     for _ in range(m):
         #select k agents at random
         selected_agents = []
         selected_agents_fits = []
         available_indices = list(range(len(agents)))
+
+        #select k agents at random
         for _ in range(k) :
             i = rd.choice(available_indices)
             available_indices.remove(i)
             selected_agents.append(agents[i])
             selected_agents_fits.append(fits[i])
-        #select the best agent on a probability proportional to its fitness
-        # total_fitness = sum(selected_agents_fits) + 1e-6
-        # probabilities = [fit / total_fitness for fit in selected_agents_fits]
-        # selected_agent = rd.choices(selected_agents, weights=probabilities, k=1)[0]
+
+        #select the agent with the minimum fitness
         selected_agent = selected_agents[selected_agents_fits.index(min(selected_agents_fits))]
         winners.append(selected_agent)
         winners_fits.append(selected_agents_fits[selected_agents.index(selected_agent)])
+
     return winners, winners_fits
 
 def fitness(agent: Timetable):
     #calculate the fitness of the agent
-    conflicts_weight = 100
-    collisions_weight = 100
-    capacity_weight = 1
-    distribution_weight = 5
+    conflicts_weight = 10
+    collisions_weight = 10
+    capacity_weight = 1.5
+    distribution_weight = 3.1
     distribution_in_day_weight = 5
 
     #There should not be more lessons in the same classroom at the same time
@@ -119,11 +129,12 @@ def fitness(agent: Timetable):
         professors = set([course.professor for course in agent.courses])
         for professor in professors:
             lessons = [lesson for course in agent.timetable for lesson in course if agent.courses[agent.timetable.index(course)].professor == professor]
-            for lesson in lessons:
-                day, classroom, hour = lesson
-                for other_lesson in lessons:
-                    if other_lesson[0] == day and other_lesson[2] == hour and other_lesson[1] != classroom:
-                        conflicts += 1
+            for day in range(5):
+                for hour in range(8):
+                    lessons_in_hour = [lesson for lesson in lessons if lesson[2] == hour and lesson[0] == day]
+                    classes = set([lesson[1] for lesson in lessons_in_hour])
+                    if len(classes) > 1:
+                        conflicts += len(classes) - 1
 
         return conflicts
 
