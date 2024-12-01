@@ -192,5 +192,5 @@ def fitness(agent: Timetable):
     fit_distribution_in_day = check_day_distribution() * distribution_in_day_weight
 
     fit = fit_collisions + fit_professor_conflicts + fit_capacity + fit_hours_per_day + fit_distribution_in_day
-    print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, hours per day: {fit_hours_per_day}, distribution in day: {fit_distribution_in_day}")
+            #print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, hours per day: {fit_hours_per_day}, distribution in day: {fit_distribution_in_day}")
     return fit
