@@ -1,9 +1,20 @@
 from tabulate import tabulate
 
+class Professor:
+    """This class represents a professor in a university"""
+
+    def __init__(self, name, free_hours):
+        """This method initializes the professor with the given name"""
+        self.name = name
+        self.free_hours = free_hours
+
+    def __str__(self):
+        return self.name
+
 class Course:
     """This class represents a course in a university"""
 
-    def __init__(self, name, professor, number_of_students, hours_for_week, preferred_hours_a_day=2):
+    def __init__(self, name, professor: Professor, number_of_students, hours_for_week, preferred_hours_a_day=2):
         """"This method initializes the course with the given name, professor, number of students for this particular course and hours for week"""
         self.name = name
         self.professor = professor
