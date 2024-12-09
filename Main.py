@@ -1,40 +1,52 @@
-from Env import Timetable, Course, Classroom
+from Env import Timetable, Course, Classroom, Professor
 import GA
 
-c1 = Course("ETC", "di nucci", 200, 8)
-c2 = Course("Math", "smith", 190, 6, 3)
-c3 = Course("Physics", "johnson", 75, 8)
-c4 = Course("Physics", "di nucci", 150, 8)
-c5 = Course("Physics", "smith", 75, 8)
-c6 = Course("Programming", "johnson", 75, 9, 3)
-c7 = Course("Chemistry", "lee", 100, 7)
-c8 = Course("Biology", "kim", 120, 6)
-c9 = Course("History", "brown", 80, 5)
-c10 = Course("Geography", "davis", 90, 4)
-c11 = Course("Art", "miller", 60, 3)
-c12 = Course("Music", "wilson", 50, 2)
-c13 = Course("Philosophy", "adams", 60, 3)
-c14 = Course("Economics", "clark", 80, 5)
-c15 = Course("Literature", "evans", 70, 4)
-c16 = Course("Sociology", "martin", 85, 6)
-c17 = Course("Psychology", "robinson", 90, 7)
-c18 = Course("Anthropology", "walker", 65, 4)
-c19 = Course("Political Science", "young", 75, 5)
-c20 = Course("Linguistics", "allen", 55, 3)
-c21 = Course("Astronomy", "taylor", 85, 6)
-c22 = Course("Statistics", "moore", 95, 5)
-c23 = Course("Computer Science", "thompson", 100, 7)
+professors = [
+    Professor("di nucci", [[1, 2], [1, 3]]),
+    Professor("smith", [[2, 3], [3, 4]]),
+    Professor("johnson", [[2, 3], [3, 4]]),
+    Professor("lee", [[1, 2], [1, 3]]),
+    Professor("kim", [[2, 3], [3, 4]]),
+]
 
-d = Classroom("p1", 200)
-e = Classroom("p2", 75)
-f = Classroom("p3", 100)
-g = Classroom("p4", 150)
-h = Classroom("p5", 90)
+# Define courses and classrooms
+courses = [
+    Course("ETC", professors[0], 200, 8),
+    Course("Math", professors[1], 190, 6, 3),
+    Course("Physics", professors[2], 75, 8),
+    Course("Programming", professors[3], 75, 9, 3),
+    Course("Chemistry", professors[4], 100, 7),
+    Course("Biology", professors[0], 120, 6),
+    Course("History", professors[1], 80, 5),
+    Course("Geography", professors[2], 90, 4),
+    Course("Art", professors[3], 60, 3),
+    Course("Music", professors[4], 50, 2),
+    Course("Philosophy", professors[0], 60, 3),
+    Course("Economics", professors[1], 80, 5),
+    Course("Literature", professors[2], 70, 4),
+    Course("Sociology", professors[3], 85, 6),
+    Course("Psychology", professors[4], 90, 7),
+    Course("Anthropology", professors[0], 65, 4),
+    Course("Political Science", professors[1], 75, 5),
+    Course("Linguistics", professors[2], 55, 3),
+    Course("Astronomy", professors[3], 85, 6),
+    Course("Statistics", professors[4], 95, 5),
+    Course("Computer Science", professors[0], 100, 7),
+]
+
+classrooms = [
+    Classroom("p1", 200),
+    Classroom("p2", 75),
+    Classroom("p3", 100),
+    Classroom("p4", 150),
+    Classroom("p5", 90)
+]
+
 
 def testing():
-    agent = Timetable([d,e,f,g,h], [c1])
+    agent = Timetable(classrooms, [courses[0]])
     timetable_data = [
-        [[0, 0, 4], [0, 0, 4], [0, 2, 4], [4, 0, 5], [4, 0, 7], [4, 0, 4], [4, 0, 6], [3, 0, 0]]
+        [[1, 0, 2], [1, 0, 3], [0, 2, 4], [4, 0, 5], [4, 0, 7], [4, 0, 4], [4, 0, 6], [3, 0, 0]]
     ]
     agent.test(timetable_data)
     GA.fitness(agent)
@@ -43,10 +55,8 @@ def testing():
 #     testing()
 
 if __name__ == "__main__":
-    courses = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23]
-    classrooms = [d, e, f, g, h]
     agents = [Timetable(classrooms, courses) for _ in range(30)]
 
-    result, fitness, statistics = GA.run(agents, generations=500, mutation_rate=0.7, k=16, m=20)
+    result, fitness, statistics = GA.run(agents, generations=5000, mutation_rate=0.7, k=20, m=20)
     print(result.display_as_table())
     GA.fitness(result)
