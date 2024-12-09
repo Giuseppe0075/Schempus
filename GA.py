@@ -43,9 +43,9 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
         agents = new_agents
 
     # Normalize the fitness values
-    normalized_fitness_values = [(fit - 0) / (5000 - 0) for fit in best_fitness_values]
+    normalized_fitness_values = [(fit / 1000) for fit in best_fitness_values]
 
-    return  best_agent, best_fit,normalized_fitness_values
+    return  best_agent, best_fit / 1000, normalized_fitness_values
 
 def mutation(agent: Timetable, number_of_mutations=1):
     for _ in range(number_of_mutations):
@@ -111,8 +111,8 @@ def fitness(agent: Timetable):
     conflicts_weight = 10
     collisions_weight = 10
     capacity_weight = 1.5
-    distribution_weight = 3.1
-    distribution_in_day_weight = 5
+    distribution_weight = 1
+    distribution_in_day_weight = 1
 
     #There should not be more lessons in the same classroom at the same time
     def count_collisions():
@@ -135,6 +135,9 @@ def fitness(agent: Timetable):
                     classes = set([lesson[1] for lesson in lessons_in_hour])
                     if len(classes) > 1:
                         conflicts += len(classes) - 1
+            for free_hour in professor.free_hours :
+                if any(lesson[0] == free_hour[0] and lesson[2] == free_hour[1] for lesson in lessons) :
+                    conflicts += 1
 
         return conflicts
 
@@ -192,5 +195,5 @@ def fitness(agent: Timetable):
     fit_distribution_in_day = check_day_distribution() * distribution_in_day_weight
 
     fit = fit_collisions + fit_professor_conflicts + fit_capacity + fit_hours_per_day + fit_distribution_in_day
-            #print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, hours per day: {fit_hours_per_day}, distribution in day: {fit_distribution_in_day}")
+    # print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, hours per day: {fit_hours_per_day}, distribution in day: {fit_distribution_in_day}")
     return fit
