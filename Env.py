@@ -14,13 +14,13 @@ class Professor:
 class Course:
     """This class represents a course in a university"""
 
-    def __init__(self, name, professor: Professor, number_of_students, hours_for_week, preferred_hours_a_day=2):
+    def __init__(self, name, professor: Professor, number_of_students, hours_for_week, lab_hours = 0):
         """"This method initializes the course with the given name, professor, number of students for this particular course and hours for week"""
         self.name = name
         self.professor = professor
         self.number_of_students = number_of_students
         self.hours_for_week = hours_for_week
-        self.preferred_hours_a_day = preferred_hours_a_day
+        self.lab_hours = lab_hours
 
     def __str__(self):
         return f"{self.name} by {self.professor}"
@@ -48,8 +48,11 @@ class Timetable:
         # Generate a random timetable
         for course in courses:
             _course = []
+            _lab_hours = course.lab_hours
             for _ in range(course.hours_for_week):
-                _course.append([rd.randint(0, 4), rd.randint(0, len(classrooms)-1), rd.randint(0, 7)]) #[day, classroom, hour]
+                # [day, classroom, hour, lab = True while lab_hours > 0 else False]
+                _course.append([rd.randint(0, 4), rd.randint(0, len(classrooms)-1), rd.randint(0, 7), True if _lab_hours > 0 else False])
+                _lab_hours -= 1
             self.timetable.append(_course)
 
     def __str__(self):
@@ -67,8 +70,8 @@ class Timetable:
         table = [["" for _ in range(len(self.classrooms))] for _ in range(5)]
         for course in self.timetable:
             for lesson in course:
-                day, classroom, hour = lesson
-                table[day][classroom] += f"{hour + 1}: {self.courses[self.timetable.index(course)].name} (ID: {self.timetable.index(course)})\n"
+                day, classroom, hour, lab = lesson
+                table[day][classroom] += f"{hour + 1}: {'Lab. ' if lab else ''}{self.courses[self.timetable.index(course)].name} (ID: {self.timetable.index(course)})\n"
 
         # Fill in free hours
         for day in range(5):

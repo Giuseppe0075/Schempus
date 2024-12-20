@@ -12,26 +12,26 @@ professors = [
 # Define courses and classrooms
 courses = [
     Course("ETC", professors[0], 200, 8),
-    Course("Math", professors[1], 190, 6, 3),
+    Course("Math", professors[1], 190, 7, 3),
     Course("Physics", professors[2], 75, 8),
     Course("Programming", professors[3], 75, 9, 3),
-    Course("Chemistry", professors[4], 100, 7),
+    Course("Chemistry", professors[4], 100, 6),
     Course("Biology", professors[0], 120, 6),
-    Course("History", professors[1], 80, 5),
+    Course("History", professors[1], 80, 6),
     Course("Geography", professors[2], 90, 4),
-    Course("Art", professors[3], 60, 3),
+    Course("Art", professors[3], 60, 4),
     Course("Music", professors[4], 50, 2),
-    Course("Philosophy", professors[0], 60, 3),
-    Course("Economics", professors[1], 80, 5),
-    Course("Literature", professors[2], 70, 4),
+    Course("Philosophy", professors[0], 60, 4),
+    Course("Economics", professors[1], 80, 6),
+    Course("Literature", professors[2], 70, 6),
     Course("Sociology", professors[3], 85, 6),
-    Course("Psychology", professors[4], 90, 7),
+    Course("Psychology", professors[4], 90, 8),
     Course("Anthropology", professors[0], 65, 4),
-    Course("Political Science", professors[1], 75, 5),
-    Course("Linguistics", professors[2], 55, 3),
+    Course("Political Science", professors[1], 75, 7, 3),
+    Course("Linguistics", professors[2], 55, 4),
     Course("Astronomy", professors[3], 85, 6),
-    Course("Statistics", professors[4], 95, 5),
-    Course("Computer Science", professors[0], 100, 7),
+    Course("Statistics", professors[4], 95, 9, 3),
+    Course("Computer Science", professors[0], 100, 9, 3),
 ]
 
 classrooms = [
@@ -44,12 +44,21 @@ classrooms = [
 
 
 def testing():
-    agent = Timetable(classrooms, [courses[0]])
-    timetable_data = [
-        [[1, 0, 2], [1, 0, 3], [0, 2, 4], [4, 0, 5], [4, 0, 7], [4, 0, 4], [4, 0, 6], [3, 0, 0]]
+    agent1 = Timetable(classrooms, [courses[0]])
+    agent2 = Timetable(classrooms, [courses[0]])
+    timetable_data1 = [
+        [[1, 0, 2, True], [1, 0, 3, True], [0, 2, 4, True], [4, 0, 5, False], [4, 0, 7, False], [4, 0, 4, False], [4, 0, 6, False], [3, 0, 0, False]]
     ]
-    agent.test(timetable_data)
-    GA.fitness(agent)
+    timetable_data2 = [
+        [[1, 0, 2, True], [1, 0, 3, True], [0, 2, 4, True], [4, 0, 5, False], [4, 0, 7, False], [4, 3, 1, True], [4, 0, 6, True], [3, 0, 0, True]]
+    ]
+
+    agent1.test(timetable_data1)
+    agent2.test(timetable_data2)
+    print(agent1, "\n", agent2)
+    child1, child2 = GA.crossover(agent1, agent2)
+    GA.fitness(child1)
+    print("\n", child1, "\n", child2)
 
 # if __name__ == "__main__":
 #     testing()

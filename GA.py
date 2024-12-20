@@ -51,7 +51,7 @@ def mutation(agent: Timetable, number_of_mutations=1):
     for _ in range(number_of_mutations):
         course_index = rd.randint(0, len(agent.timetable) - 1)
         lesson_index = rd.randint(0, len(agent.timetable[course_index]) - 1)
-        new_lesson = [rd.randint(0,4), rd.randint(0,len(agent.classrooms) - 1), rd.randint(0, 7)]
+        new_lesson = [rd.randint(0,4), rd.randint(0,len(agent.classrooms) - 1), rd.randint(0, 7), agent.timetable[course_index][lesson_index][3]]
         agent.timetable[course_index][lesson_index] = new_lesson
 
 def crossover(agent1: Timetable, agent2: Timetable):
@@ -60,12 +60,15 @@ def crossover(agent1: Timetable, agent2: Timetable):
     child2 = copy.deepcopy(agent2)
 
     # For each course
-    for i in range(len(child1.courses)) :
+    for i in range(len(child1.courses)):
         # Select a random point
         point = rd.randint(0, len(child1.timetable[i]) - 1)
-        # Swap the lessons after the point
-        child1.timetable[i][point :], child2.timetable[i][point :] = copy.deepcopy(
-            child2.timetable[i][point :]), copy.deepcopy(child1.timetable[i][point :])
+        # Swap the lessons after the point, keeping the Lab field unchanged
+        for j in range(point, len(child1.timetable[i])):
+            child1_lesson = child1.timetable[i][j]
+            child2_lesson = child2.timetable[i][j]
+            child1.timetable[i][j] = [child2_lesson[0], child2_lesson[1], child2_lesson[2], child1_lesson[3]]
+            child2.timetable[i][j] = [child1_lesson[0], child1_lesson[1], child1_lesson[2], child2_lesson[3]]
 
     return child1, child2
 
@@ -111,8 +114,8 @@ def fitness(agent: Timetable):
     conflicts_weight = 10
     collisions_weight = 10
     capacity_weight = 1.5
-    distribution_weight = 1
-    distribution_in_day_weight = 1
+    week_distribution_weight = 5
+    distribution_in_day_weight = 5
 
     #There should not be more lessons in the same classroom at the same time
     def count_collisions():
@@ -158,20 +161,28 @@ def fitness(agent: Timetable):
 
         return total_error
 
-    #Each course should follow a preferred number of hours per day
+    #Each course should follow have 2 hours per day of Theory and 3 hours of Lab
     def check_week_distribution():
         total_error = 0
-        courses_object = agent.courses
         courses = agent.timetable
         for course in courses:
-            course_index = courses.index(course)
-            hours_goal = courses_object[course_index].preferred_hours_a_day
+            #Check that lab_lessons are 3 hours per day
+            lab_lessons = [lesson for lesson in course if lesson[3]]
+            days_for_lab = set(lesson[0] for lesson in lab_lessons)
+            total_error += abs(len(lab_lessons)/3 - len(days_for_lab))
+
+            #Check that theory_lessons are 2 hours per day
+            theory_lessons = [lesson for lesson in course if not lesson[3]]
+            days_for_theory = set(lesson[0] for lesson in theory_lessons)
+            total_error += abs(len(theory_lessons)/2 - len(days_for_theory))
+
+            #Check that lab_hours and theory_hours are in different days
             for day in range(5):
-                lessons = [lesson for lesson in course if lesson[0] == day]
-                if len(lessons) == 0:
-                    continue
-                hours = len(lessons)
-                total_error += abs(hours - hours_goal)
+                theory_hours = [lesson for lesson in theory_lessons if lesson[0] == day]
+                lab_hours = [lesson for lesson in lab_lessons if lesson[0] == day]
+                if theory_hours and lab_hours:
+                    total_error += 1
+
         return total_error
 
     #It is preferred that a course have consecutive hours in the same classroom
@@ -191,9 +202,9 @@ def fitness(agent: Timetable):
     fit_collisions = count_collisions() * collisions_weight
     fit_professor_conflicts = count_professor_conflicts() * conflicts_weight
     fit_capacity = capacity_error() * capacity_weight
-    fit_hours_per_day = check_week_distribution() * distribution_weight
+    fit_distribution_in_week = check_week_distribution() * week_distribution_weight
     fit_distribution_in_day = check_day_distribution() * distribution_in_day_weight
 
-    fit = fit_collisions + fit_professor_conflicts + fit_capacity + fit_hours_per_day + fit_distribution_in_day
-    # print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, hours per day: {fit_hours_per_day}, distribution in day: {fit_distribution_in_day}")
+    fit = fit_collisions + fit_professor_conflicts + fit_capacity + fit_distribution_in_week + fit_distribution_in_day
+    print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, hours per day: {fit_distribution_in_week}, distribution in day: {fit_distribution_in_day}")
     return fit
