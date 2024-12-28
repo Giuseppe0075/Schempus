@@ -2,14 +2,19 @@ import copy
 import random as rd
 from Env import Timetable
 
+NUMBER_OF_DAYS = 5
+NUMBER_OF_HOURS = 8
+
 def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
     n_agents = len(agents)
     best_agent = agents[0]
     best_fit = fitness(agents[0])
     best_fitness_values = []
 
-    for i in range(generations):
-        print(f"{int(i/generations * 100)}%")
+    NUMBER_OF_CLASSES = len(agents[0].classrooms)
+
+    for i in range(1, generations):
+        # print(f"{int(i/generations * 100)}%")
         # Select agents
         agents, fits = selection(agents, k, m)
 
@@ -36,9 +41,13 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
                 new_agents.append(child2)
 
         # Mutation
+        day_mutation = NUMBER_OF_DAYS - int(NUMBER_OF_DAYS / (generations / i))
+        class_mutation = NUMBER_OF_CLASSES - int(NUMBER_OF_CLASSES / (generations / i))
+        hour_mutation = NUMBER_OF_HOURS - int(NUMBER_OF_HOURS / (generations / i))
+
         for agent in new_agents:
             if rd.random() < mutation_rate:
-                mutation(agent, number_of_mutations=rd.randint(1, 5))
+                mutation(agent, day_mutation, class_mutation, hour_mutation)
 
         agents = new_agents
 
@@ -47,11 +56,17 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
 
     return  best_agent, best_fit / 1000, normalized_fitness_values
 
-def mutation(agent: Timetable, number_of_mutations=1):
+def mutation(agent: Timetable,day_mutation, class_mutation, hour_mutation, number_of_mutations=1):
+    # print(f"Mutation: day: {day_mutation}, class: {class_mutation}, hour: {hour_mutation}")
     for _ in range(number_of_mutations):
         course_index = rd.randint(0, len(agent.timetable) - 1)
         lesson_index = rd.randint(0, len(agent.timetable[course_index]) - 1)
-        new_lesson = [rd.randint(0,4), rd.randint(0,len(agent.classrooms) - 1), rd.randint(0, 7), agent.timetable[course_index][lesson_index][3]]
+        old_lesson = agent.timetable[course_index][lesson_index]
+        new_lesson = [
+            (old_lesson[0] + rd.randint(0,day_mutation)) % 5,
+            (old_lesson[1] + rd.randint(0,class_mutation)) % len(agent.classrooms),
+            (old_lesson[2] + rd.randint(0,hour_mutation)) % 8,
+            old_lesson[3]]
         agent.timetable[course_index][lesson_index] = new_lesson
 
 def crossover(agent1: Timetable, agent2: Timetable):
@@ -181,7 +196,7 @@ def fitness(agent: Timetable):
                 theory_hours = [lesson for lesson in theory_lessons if lesson[0] == day]
                 lab_hours = [lesson for lesson in lab_lessons if lesson[0] == day]
                 if theory_hours and lab_hours:
-                    total_error += 1
+                    total_error += min(len(theory_hours), len(lab_hours))
 
         return total_error
 
@@ -206,5 +221,5 @@ def fitness(agent: Timetable):
     fit_distribution_in_day = check_day_distribution() * distribution_in_day_weight
 
     fit = fit_collisions + fit_professor_conflicts + fit_capacity + fit_distribution_in_week + fit_distribution_in_day
-    print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, hours per day: {fit_distribution_in_week}, distribution in day: {fit_distribution_in_day}")
+    print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, week distribution: {fit_distribution_in_week}, day distribution: {fit_distribution_in_day}")
     return fit
