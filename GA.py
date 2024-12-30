@@ -28,6 +28,8 @@ def run(agents, generations=100, mutation_rate=0.9, k=20, m=20):
                     f.write(str(best_fit) + "\n")
                     f.write(best_agent.display_as_table())
                     f.write("\n" + str(best_agent))
+                if best_fit == 0:
+                    break
 
         best_fitness_values.append(best_fit)
         new_agents = [best_agent]
@@ -217,10 +219,15 @@ def fitness(agent: Timetable):
             days_for_lab = set(lab[0] for lab in lab_lessons)
             days_for_theory = set(thy[0] for thy in theory_lessons)
 
-            # Count of hours vs number of dedicated days
-            # Example: if lab_lessons = 6, 6/3 = 2 "blocks of 3 hours", days_for_lab = 2 => zero error
-            total_error += abs((len(lab_lessons) / 3) - len(days_for_lab))
-            total_error += abs((len(theory_lessons) / 2) - len(days_for_theory))
+            # Theory should have 2 hours per day
+            for day in days_for_theory:
+                theory_hours = [l for l in theory_lessons if l[0] == day]
+                total_error += abs(len(theory_hours) - 2)
+
+            # Lab should have 3 hours per day
+            for day in days_for_lab:
+                lab_hours = [l for l in lab_lessons if l[0] == day]
+                total_error += abs(len(lab_hours) - 3)
 
             # Lab and theory should not be on the same day
             for day in range(NUMBER_OF_DAYS):
