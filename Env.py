@@ -61,7 +61,7 @@ class Timetable:
             result.append(str(lesson) for lesson in course)
         return tabulate(result, tablefmt="plain")
 
-    def test(self, timetable):
+    def set_timetable(self, timetable):
         self.timetable = timetable
 
 

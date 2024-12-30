@@ -1,11 +1,12 @@
 import copy
 import random as rd
+from collections import Counter
 from Env import Timetable
 
 NUMBER_OF_DAYS = 5
 NUMBER_OF_HOURS = 8
 
-def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
+def run(agents, generations=100, mutation_rate=0.9, k=20, m=20):
     n_agents = len(agents)
     best_agent = agents[0]
     best_fit = fitness(agents[0])
@@ -14,15 +15,15 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
     NUMBER_OF_CLASSES = len(agents[0].classrooms)
 
     for i in range(1, generations):
-        # print(f"{int(i/generations * 100)}%")
-        # Select agents
+        # Selection
         agents, fits = selection(agents, k, m)
 
         # Find the best agent
-        for agent, fit in zip(agents, fits):
-            if fit < best_fit:
+        for agent, fit_val in zip(agents, fits):
+            if fit_val < best_fit:
                 best_agent = copy.deepcopy(agent)
-                best_fit = copy.deepcopy(fit)
+                best_fit = fit_val
+                # Save the best agent
                 with open("best_agent.txt", "w") as f:
                     f.write(str(best_fit) + "\n")
                     f.write(best_agent.display_as_table())
@@ -40,23 +41,25 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
             if len(new_agents) < n_agents:
                 new_agents.append(child2)
 
-        # Mutation
+        # Calculate mutation ranges based on generation progress
         day_mutation = NUMBER_OF_DAYS - int(NUMBER_OF_DAYS / (generations / i))
         class_mutation = NUMBER_OF_CLASSES - int(NUMBER_OF_CLASSES / (generations / i))
         hour_mutation = NUMBER_OF_HOURS - int(NUMBER_OF_HOURS / (generations / i))
 
-        for agent in new_agents:
+        # Mutation
+        for ag in new_agents:
             if rd.random() < mutation_rate:
-                mutation(agent, day_mutation, class_mutation, hour_mutation)
+                mutation(ag, day_mutation, class_mutation, hour_mutation)
 
         agents = new_agents
 
-    # Normalize the fitness values
-    normalized_fitness_values = [(fit / 1000) for fit in best_fitness_values]
+    # Normalize fitness values
+    normalized_fitness_values = [(fit_val / 1000) for fit_val in best_fitness_values]
 
-    return  best_agent, best_fit / 1000, normalized_fitness_values
+    return best_agent, best_fit / 1000, normalized_fitness_values
 
-def mutation(agent: Timetable,day_mutation, class_mutation, hour_mutation, number_of_mutations=1):
+
+def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation, number_of_mutations=1):
     for _ in range(number_of_mutations):
         # Select a random lesson
         course_index = rd.randint(0, len(agent.timetable) - 1)
@@ -65,14 +68,16 @@ def mutation(agent: Timetable,day_mutation, class_mutation, hour_mutation, numbe
 
         # Mutate the lesson
         new_lesson = [
-            (old_lesson[0] + rd.randint(0,day_mutation)) % 5,
-            (old_lesson[1] + rd.randint(0,class_mutation)) % len(agent.classrooms),
-            (old_lesson[2] + rd.randint(0,hour_mutation)) % 8,
-            old_lesson[3]]
+            (old_lesson[0] + rd.randint(0, day_mutation)) % NUMBER_OF_DAYS,
+            (old_lesson[1] + rd.randint(0, class_mutation)) % len(agent.classrooms),
+            (old_lesson[2] + rd.randint(0, hour_mutation)) % NUMBER_OF_HOURS,
+            old_lesson[3]
+        ]
         agent.timetable[course_index][lesson_index] = new_lesson
 
+
 def crossover(agent1: Timetable, agent2: Timetable):
-    # Create deep copies of the agents to avoid modifying the original agents
+    # Create deep copies of the agents to avoid modifying the originals
     child1 = copy.deepcopy(agent1)
     child2 = copy.deepcopy(agent2)
 
@@ -80,148 +85,190 @@ def crossover(agent1: Timetable, agent2: Timetable):
     for i in range(len(child1.courses)):
         # Select a random point
         point = rd.randint(0, len(child1.timetable[i]) - 1)
-        # Swap the lessons after the point, keeping the Lab field unchanged
+        # Swap lessons after the point, keeping the Lab field unchanged
         for j in range(point, len(child1.timetable[i])):
-            child1_lesson = child1.timetable[i][j]
-            child2_lesson = child2.timetable[i][j]
-            child1.timetable[i][j] = [child2_lesson[0], child2_lesson[1], child2_lesson[2], child1_lesson[3]]
-            child2.timetable[i][j] = [child1_lesson[0], child1_lesson[1], child1_lesson[2], child2_lesson[3]]
+            c1_lesson = child1.timetable[i][j]
+            c2_lesson = child2.timetable[i][j]
+            child1.timetable[i][j] = [c2_lesson[0], c2_lesson[1], c2_lesson[2], c1_lesson[3]]
+            child2.timetable[i][j] = [c1_lesson[0], c1_lesson[1], c1_lesson[2], c2_lesson[3]]
 
     return child1, child2
 
-#Selection with k-way tournament
+
 def selection(agents: list, k, m):
+    """
+    Selection with K-way tournament.
+    k = number of agents competing in the tournament
+    m = number of final winners
+    """
     if len(agents) < k:
         raise ValueError("The number of agents must be greater than k")
     if len(agents) < m:
         raise ValueError("The number of agents must be greater than m")
 
-    #calculate the fitness of each agent
-    fits = []
-    for agent in agents:
-        fits.append(fitness(agent))
+    # Calculate the fitness of each agent
+    fits = [fitness(ag) for ag in agents]
 
-    #select m agents
     winners = []
     winners_fits = []
 
-    #select m agents
+    # Select m agents
     for _ in range(m):
-        #select k agents at random
-        selected_agents = []
-        selected_agents_fits = []
-        available_indices = list(range(len(agents)))
+        # Select k random agents
+        selected_indices = rd.sample(range(len(agents)), k)
+        selected_agents = [agents[idx] for idx in selected_indices]
+        selected_fits = [fits[idx] for idx in selected_indices]
 
-        #select k agents at random
-        for _ in range(k) :
-            i = rd.choice(available_indices)
-            available_indices.remove(i)
-            selected_agents.append(agents[i])
-            selected_agents_fits.append(fits[i])
-
-        #select the agent with the minimum fitness
-        selected_agent = selected_agents[selected_agents_fits.index(min(selected_agents_fits))]
-        winners.append(selected_agent)
-        winners_fits.append(selected_agents_fits[selected_agents.index(selected_agent)])
+        # Determine the tournament winner (lowest fitness)
+        min_fit = min(selected_fits)
+        min_idx = selected_fits.index(min_fit)
+        winners.append(selected_agents[min_idx])
+        winners_fits.append(min_fit)
 
     return winners, winners_fits
 
+
 def fitness(agent: Timetable):
-    #calculate the fitness of the agent
+    """
+    Calculate the fitness of an agent based on:
+    - collisions (same classroom/hour)
+    - professor conflicts
+    - classroom capacity
+    - weekly distribution
+    - daily distribution
+    """
     conflicts_weight = 10
     collisions_weight = 10
     capacity_weight = 1.5
     week_distribution_weight = 5
     distribution_in_day_weight = 5
 
-    #There should not be more lessons in the same classroom at the same time
-    def count_collisions():
-        collisions = 0
-        lessons = [lesson for course in agent.timetable for lesson in course]
-        for lesson in lessons :
-            if lessons.count(lesson) > 1 :
-                collisions += 1
-        return collisions
+    # Total lessons
+    all_courses = agent.timetable
+    n_courses = len(all_courses)
 
-    #A Professor should not have two different lessons at the same time
+    # -------------------------------------------------------------------
+    # 1. Count collisions (same classroom and same hour)
+    #    Using Counter, we avoid the O(n^2) of lessons.count(lesson)
+    # -------------------------------------------------------------------
+    def count_collisions():
+        lessons = [tuple(lesson) for course in all_courses for lesson in course]
+        lesson_counter = Counter(lessons)
+        # Each duplicate adds (count - 1) to the number of collisions
+        return sum(cnt - 1 for cnt in lesson_counter.values() if cnt > 1)
+
+    # -------------------------------------------------------------------
+    # 2. Professor conflicts
+    #    - A professor cannot teach multiple courses simultaneously
+    #    - If the professor has free hours, they should not have lessons during those hours
+    # -------------------------------------------------------------------
     def count_professor_conflicts():
         conflicts = 0
-        professors = set([course.professor for course in agent.courses])
-        for professor in professors:
-            lessons = [lesson for course in agent.timetable for lesson in course if agent.courses[agent.timetable.index(course)].professor == professor]
-            for day in range(5):
-                for hour in range(8):
-                    lessons_in_hour = [lesson for lesson in lessons if lesson[2] == hour and lesson[0] == day]
-                    classes = set([lesson[1] for lesson in lessons_in_hour])
-                    if len(classes) > 1:
-                        conflicts += len(classes) - 1
-            for free_hour in professor.free_hours :
-                if any(lesson[0] == free_hour[0] and lesson[2] == free_hour[1] for lesson in lessons) :
+        # To speed up: use enumerate to link timetable and courses
+        # professor_lessons[prof] = list of (day, hour) where they teach
+        professor_lessons_map = {}
+
+        for i, course in enumerate(all_courses):
+            prof = agent.courses[i].professor
+            if prof not in professor_lessons_map:
+                professor_lessons_map[prof] = []
+            # Add all (day, hour) for this course
+            for lesson in course:
+                professor_lessons_map[prof].append((lesson[0], lesson[2]))
+
+        # Count time conflicts
+        for prof, lesson_list in professor_lessons_map.items():
+            day_hour_counter = Counter(lesson_list)
+            # If there are 2 or more lessons in a (day, hour) => conflict
+            conflicts += sum(cnt - 1 for cnt in day_hour_counter.values() if cnt > 1)
+
+            # Count conflicts with free hours
+            for free_hour in prof.free_hours:
+                if free_hour in lesson_list:
                     conflicts += 1
 
         return conflicts
 
-    #The number of students in a classroom should not exceed its capacity
+    # -------------------------------------------------------------------
+    # 3. Classroom capacity should not be exceeded
+    # -------------------------------------------------------------------
     def capacity_error():
         total_error = 0
-        course_objects = agent.courses
-        classrooms = agent.classrooms
-        courses = agent.timetable
-        for course in courses:
-            course_index = courses.index(course)
-            course_students = course_objects[course_index].number_of_students
+        for i, course in enumerate(all_courses):
+            course_students = agent.courses[i].number_of_students
             for lesson in course:
-                class_capacity = classrooms[lesson[1]].capacity
+                class_capacity = agent.classrooms[lesson[1]].capacity
                 error = course_students - class_capacity
-                if error < 0: error = 0
-                total_error += error
-
+                if error > 0:
+                    total_error += error
         return total_error
 
-    #Each course should follow have 2 hours per day of Theory and 3 hours of Lab
+    # -------------------------------------------------------------------
+    # 4. Weekly distribution of Lab and Theory
+    #    - Example constraints: 3 hours of lab or 2 hours of theory per day
+    #    - No overlap of lab/theory on the same day
+    # -------------------------------------------------------------------
     def check_week_distribution():
         total_error = 0
-        courses = agent.timetable
-        for course in courses:
-            #Check that lab_lessons are 3 hours per day
-            lab_lessons = [lesson for lesson in course if lesson[3]]
-            days_for_lab = set(lesson[0] for lesson in lab_lessons)
-            total_error += abs(len(lab_lessons)/3 - len(days_for_lab))
+        for i, course in enumerate(all_courses):
+            lab_lessons = [l for l in course if l[3]]       # l[3] == True => Lab
+            theory_lessons = [l for l in course if not l[3]]
 
-            #Check that theory_lessons are 2 hours per day
-            theory_lessons = [lesson for lesson in course if not lesson[3]]
-            days_for_theory = set(lesson[0] for lesson in theory_lessons)
-            total_error += abs(len(theory_lessons)/2 - len(days_for_theory))
+            days_for_lab = set(lab[0] for lab in lab_lessons)
+            days_for_theory = set(thy[0] for thy in theory_lessons)
 
-            #Check that lab_hours and theory_hours are in different days
-            for day in range(5):
-                theory_hours = [lesson for lesson in theory_lessons if lesson[0] == day]
-                lab_hours = [lesson for lesson in lab_lessons if lesson[0] == day]
+            # Count of hours vs number of dedicated days
+            # Example: if lab_lessons = 6, 6/3 = 2 "blocks of 3 hours", days_for_lab = 2 => zero error
+            total_error += abs((len(lab_lessons) / 3) - len(days_for_lab))
+            total_error += abs((len(theory_lessons) / 2) - len(days_for_theory))
+
+            # Lab and theory should not be on the same day
+            for day in range(NUMBER_OF_DAYS):
+                theory_hours = [l for l in theory_lessons if l[0] == day]
+                lab_hours = [l for l in lab_lessons if l[0] == day]
                 if theory_hours and lab_hours:
+                    # penalize overlap in the day
                     total_error += min(len(theory_hours), len(lab_hours))
 
         return total_error
 
-    #It is preferred that a course have consecutive hours in the same classroom
+    # -------------------------------------------------------------------
+    # 5. Daily distribution:
+    #    - consecutive lessons and in the same classroom are preferred
+    # -------------------------------------------------------------------
     def check_day_distribution():
         total_error = 0
-        for day in range(5) :
-            for course in agent.timetable :
-                hours = set(lesson[2] for lesson in course if lesson[0] == day)
-                if hours :
-                    total_error += max(hours) - min(hours) - len(hours) + 1
-                classes = set(lesson[1] for lesson in course if lesson[0] == day)
-                if classes :
-                    total_error += len(classes) - 1
+        for day in range(NUMBER_OF_DAYS):
+            for course in all_courses:
+                # Hours this course is held on the day
+                hours_in_day = set([lesson[2] for lesson in course if lesson[0] == day])
+                if hours_in_day:
+                    max_h = max(hours_in_day)
+                    min_h = min(hours_in_day)
+                    total_error += (max_h - min_h - len(hours_in_day) + 1)
+
+                # Classrooms used for this course on the same day
+                classes_in_day = set(lesson[1] for lesson in course if lesson[0] == day)
+                if len(classes_in_day) > 1:
+                    # penalize classroom change
+                    total_error += len(classes_in_day) - 1
 
         return total_error
 
+    # Calculate individual contributions
     fit_collisions = count_collisions() * collisions_weight
-    fit_professor_conflicts = count_professor_conflicts() * conflicts_weight
+    fit_prof_conf = count_professor_conflicts() * conflicts_weight
     fit_capacity = capacity_error() * capacity_weight
-    fit_distribution_in_week = check_week_distribution() * week_distribution_weight
-    fit_distribution_in_day = check_day_distribution() * distribution_in_day_weight
+    fit_week_dist = check_week_distribution() * week_distribution_weight
+    fit_day_dist = check_day_distribution() * distribution_in_day_weight
 
-    fit = fit_collisions + fit_professor_conflicts + fit_capacity + fit_distribution_in_week + fit_distribution_in_day
-    # print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, week distribution: {fit_distribution_in_week}, day distribution: {fit_distribution_in_day}")
-    return fit
+    # Total fitness
+    total_fit = (
+        fit_collisions +
+        fit_prof_conf +
+        fit_capacity +
+        fit_week_dist +
+        fit_day_dist
+    )
+    print(f"fit: {total_fit} <- collisions: {fit_collisions}, professor conflicts: {fit_prof_conf}, capacity: {fit_capacity}, week distribution: {fit_week_dist}, day distribution: {fit_day_dist}")
+    return total_fit
