@@ -152,7 +152,7 @@ def fitness(agent: Timetable):
     #    Using Counter, we avoid the O(n^2) of lessons.count(lesson)
     # -------------------------------------------------------------------
     def count_collisions():
-        lessons = [tuple(lesson) for course in all_courses for lesson in course]
+        lessons = [tuple(lesson[0:3]) for course in all_courses for lesson in course]
         lesson_counter = Counter(lessons)
         # Each duplicate adds (count - 1) to the number of collisions
         return sum(cnt - 1 for cnt in lesson_counter.values() if cnt > 1)
