@@ -29,9 +29,9 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
                     f.write("\n" + str(best_agent))
 
         best_fitness_values.append(best_fit)
+        new_agents = [best_agent]
 
         # Crossover
-        new_agents = []
         while len(new_agents) < n_agents:
             agent1 = rd.choice(agents)
             agent2 = rd.choice(agents)
@@ -57,11 +57,13 @@ def run(agents, generations=100, mutation_rate=0.4, k=4, m=2):
     return  best_agent, best_fit / 1000, normalized_fitness_values
 
 def mutation(agent: Timetable,day_mutation, class_mutation, hour_mutation, number_of_mutations=1):
-    # print(f"Mutation: day: {day_mutation}, class: {class_mutation}, hour: {hour_mutation}")
     for _ in range(number_of_mutations):
+        # Select a random lesson
         course_index = rd.randint(0, len(agent.timetable) - 1)
         lesson_index = rd.randint(0, len(agent.timetable[course_index]) - 1)
         old_lesson = agent.timetable[course_index][lesson_index]
+
+        # Mutate the lesson
         new_lesson = [
             (old_lesson[0] + rd.randint(0,day_mutation)) % 5,
             (old_lesson[1] + rd.randint(0,class_mutation)) % len(agent.classrooms),
@@ -221,5 +223,5 @@ def fitness(agent: Timetable):
     fit_distribution_in_day = check_day_distribution() * distribution_in_day_weight
 
     fit = fit_collisions + fit_professor_conflicts + fit_capacity + fit_distribution_in_week + fit_distribution_in_day
-    print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, week distribution: {fit_distribution_in_week}, day distribution: {fit_distribution_in_day}")
+    # print(f"fit: {fit} <- collisions: {fit_collisions}, professor conflicts: {fit_professor_conflicts}, capacity: {fit_capacity}, week distribution: {fit_distribution_in_week}, day distribution: {fit_distribution_in_day}")
     return fit

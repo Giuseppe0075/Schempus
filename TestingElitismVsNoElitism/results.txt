@@ -1,0 +1,10 @@
+Mean without Elitism 1 generations: 0.045
+Mean without Elitism 2 generations: 0.033999999999999996
+Mean without Elitism 3 generations: 0.03
+Mean without Elitism 4 generations: 0.028999999999999998
+Mean without Elitism 5 generations: 0.027500000000000004
+Mean with Elitism 1 generations: 0.053500000000000006
+Mean with Elitism 2 generations: 0.03
+Mean with Elitism 3 generations: 0.0295
+Mean with Elitism 4 generations: 0.028500000000000004
+Mean with Elitism 5 generations: 0.027500000000000004

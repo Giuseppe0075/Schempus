@@ -1,4 +1,3 @@
-import os
 import multiprocessing
 import matplotlib.pyplot as plt
 from Env import Timetable, Course, Classroom, Professor
@@ -15,26 +14,26 @@ professors = [
 # Define courses and classrooms
 courses = [
     Course("ETC", professors[0], 200, 8),
-    Course("Math", professors[1], 190, 6, 3),
+    Course("Math", professors[1], 190, 7, 3),
     Course("Physics", professors[2], 75, 8),
     Course("Programming", professors[3], 75, 9, 3),
-    Course("Chemistry", professors[4], 100, 7),
+    Course("Chemistry", professors[4], 100, 6),
     Course("Biology", professors[0], 120, 6),
-    Course("History", professors[1], 80, 5),
+    Course("History", professors[1], 80, 6),
     Course("Geography", professors[2], 90, 4),
-    Course("Art", professors[3], 60, 3),
+    Course("Art", professors[3], 60, 4),
     Course("Music", professors[4], 50, 2),
-    Course("Philosophy", professors[0], 60, 3),
-    Course("Economics", professors[1], 80, 5),
-    Course("Literature", professors[2], 70, 4),
+    Course("Philosophy", professors[0], 60, 4),
+    Course("Economics", professors[1], 80, 6),
+    Course("Literature", professors[2], 70, 6),
     Course("Sociology", professors[3], 85, 6),
-    Course("Psychology", professors[4], 90, 7),
+    Course("Psychology", professors[4], 90, 8),
     Course("Anthropology", professors[0], 65, 4),
-    Course("Political Science", professors[1], 75, 5),
-    Course("Linguistics", professors[2], 55, 3),
+    Course("Political Science", professors[1], 75, 7, 3),
+    Course("Linguistics", professors[2], 55, 4),
     Course("Astronomy", professors[3], 85, 6),
-    Course("Statistics", professors[4], 95, 5),
-    Course("Computer Science", professors[0], 100, 7),
+    Course("Statistics", professors[4], 95, 9, 3),
+    Course("Computer Science", professors[0], 100, 9, 3),
 ]
 
 classrooms = [
@@ -45,64 +44,76 @@ classrooms = [
     Classroom("p5", 90)
 ]
 
-# Create plots3 directory if it doesn't exist
-if not os.path.exists('plots3'):
-    os.makedirs('plots3')
+STRING = "k-m"
 
-# Function to run the GA and save the results
-def run_ga_test(process_id,results, statistics_list,  _generations, mutation_rate, k, m):
+def run_ga_test(_generations, mutation_rate, k, m):
     agents = [Timetable(classrooms, courses) for _ in range(50)]
-    result, fitness, statistics = GA.run(agents, generations=_generations, mutation_rate=mutation_rate, k=k, m=m)
-    results[process_id] = fitness
-    statistics_list[process_id] = statistics
+    result, fitness, statistics = GA.run(agents, generations=_generations,
+                                         mutation_rate=mutation_rate,
+                                         k=k, m=m)
+    # Restituisco i due valori: fitness e l'array delle statistiche
+    return fitness, statistics
 
 if __name__ == '__main__':
-    # Number of tests to run
-    num_tests = 10
-    num_processes = 10
-    manager = multiprocessing.Manager()
-    results = manager.list([None] * num_processes)
-    statistics_list = manager.list([None] * num_processes)
+    # Numero di test
+    num_tests = 25
+    # Numero di processi TOT da lanciare per ogni test
+    num_processes = 25
+    # Numero di processi massimi in parallelo
+    max_workers = 10  # ad esempio 10
 
-    # Clear the results file
+    # Pulisco il file dei risultati
     with open('results.txt', 'w'):
         pass
 
-    for j in range(1, num_tests + 1):
-        processes = []
+    # Creo la pool con concurrency limitata a max_workers
+    pool = multiprocessing.Pool(processes=max_workers)
+
+    for j in range(11, num_tests + 1):
         generations = 500
-        # Create and start processes
+
+        # Invio i job alla pool e mi salvo i riferimenti
+        async_results = []
         for i in range(num_processes):
-            process = multiprocessing.Process(target=run_ga_test, args=(i,results,statistics_list, generations, 0.7, 20, 20))
-            processes.append(process)
-            process.start()
+            async_results.append(
+                pool.apply_async(
+                    run_ga_test,
+                    args=(generations, 0.9, 20, 20)
+                )
+            )
 
-        # Wait for all processes to complete
-        for process in processes:
-            process.join()
+        # Ora aspetto che tutti i job finiscano
+        # e raccolgo i risultati (fitness e statistics)
+        results = []
+        statistics_list = []
+        for ar in async_results:
+            fit, stats = ar.get()  # blocca finché non è pronto
+            results.append(fit)
+            statistics_list.append(stats)
 
-        print(f"Test {j} completed")
+        print(f"{STRING} ({j})")
 
-        # Plot the learning curves for all threads
+        # Plotto le statistiche di tutti i processi
         for stats in statistics_list:
             if stats is not None:
                 plt.plot(stats)
+
         plt.xlabel('Generation')
         plt.ylabel('Normalized Best Fitness')
-        plt.title(f'Learning Curve of the Genetic Algorithm (Test {j})')
+        plt.title(f'{STRING} k=m={j*2}')
         plt.grid(True)
         plt.xlim(0, generations-1)
         plt.ylim(0, 1)
-        plt.savefig(f'plots'
-                    f'/learning_curve_test_{j}.png')
+        plt.savefig(f'plots/{STRING}_{j*2}.png')
         plt.close()
 
-        # Save results for statistical analysis
-        with open('results.txt', 'a') as f:
-            valid_results = [r for r in results if r is not None]
-            if valid_results:
-                mean = sum(valid_results) / len(valid_results)
-                f.write(f"Test {j}: {mean}\n")
+        # Calcolo e salvo la media dei fitness
+        valid_results = [r for r in results if r is not None]
+        if valid_results:
+            mean_value = sum(valid_results) / len(valid_results)
+            with open('results.txt', 'a') as f:
+                f.write(f"Mean {STRING} {j} generations: {mean_value}\n")
 
-        results = manager.list([None] * num_processes)
-        statistics_list = manager.list([None] * num_processes)
+    # Chiudo la pool
+    pool.close()
+    pool.join()
