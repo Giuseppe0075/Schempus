@@ -29,10 +29,10 @@ def run(agents, generations=100, mutation_rate=0.9, k=20, m=20):
                     f.write(best_agent.display_as_table())
                     f.write("\n" + str(best_agent))
                 if best_fit == 0:
-                    break
+                    return best_agent, 0
 
         best_fitness_values.append(best_fit)
-        new_agents = [best_agent]
+        new_agents = [copy.deepcopy(best_agent)]
 
         # Crossover
         while len(new_agents) < n_agents:
@@ -58,7 +58,7 @@ def run(agents, generations=100, mutation_rate=0.9, k=20, m=20):
     # Normalize fitness values
     normalized_fitness_values = [(fit_val / 1000) for fit_val in best_fitness_values]
 
-    return best_agent, best_fit / 1000, normalized_fitness_values
+    return best_agent, best_fit # / 1000, normalized_fitness_values
 
 
 def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation, number_of_mutations=1):
@@ -139,11 +139,12 @@ def fitness(agent: Timetable):
     - weekly distribution
     - daily distribution
     """
-    conflicts_weight = 10
-    collisions_weight = 10
-    capacity_weight = 1.5
-    week_distribution_weight = 5
-    distribution_in_day_weight = 5
+    conflicts_weight = 20
+    collisions_weight = 20
+    capacity_weight = 1
+    week_distribution_weight = 7.5
+    distribution_in_day_weight = 2.5
+    lab_allocation_weight = 10
 
     # Total lessons
     all_courses = agent.timetable
@@ -151,7 +152,6 @@ def fitness(agent: Timetable):
 
     # -------------------------------------------------------------------
     # 1. Count collisions (same classroom and same hour)
-    #    Using Counter, we avoid the O(n^2) of lessons.count(lesson)
     # -------------------------------------------------------------------
     def count_collisions():
         lessons = [tuple(lesson[0:3]) for course in all_courses for lesson in course]
@@ -166,7 +166,6 @@ def fitness(agent: Timetable):
     # -------------------------------------------------------------------
     def count_professor_conflicts():
         conflicts = 0
-        # To speed up: use enumerate to link timetable and courses
         # professor_lessons[prof] = list of (day, hour) where they teach
         professor_lessons_map = {}
 
@@ -262,12 +261,30 @@ def fitness(agent: Timetable):
 
         return total_error
 
+    # -------------------------------------------------------------------
+    # 6. Lab allocation
+    #    - Lab should be allocated to the correct classroom
+    # -------------------------------------------------------------------
+    def check_lab_allocation():
+        total_error = 0
+        for i, course in enumerate(all_courses):
+            lab_lessons = [l for l in course if l[3]]       # l[3] == True => Lab
+            theory_lessons = [l for l in course if not l[3]]
+            for lesson in theory_lessons:
+                if agent.classrooms[lesson[1]].is_lab:
+                    total_error += 1
+            for lesson in lab_lessons:
+                if not agent.classrooms[lesson[1]].is_lab or agent.classrooms[lesson[1]].subject != agent.courses[i].subject:
+                    total_error += 1
+        return total_error
+
     # Calculate individual contributions
     fit_collisions = count_collisions() * collisions_weight
     fit_prof_conf = count_professor_conflicts() * conflicts_weight
     fit_capacity = capacity_error() * capacity_weight
     fit_week_dist = check_week_distribution() * week_distribution_weight
     fit_day_dist = check_day_distribution() * distribution_in_day_weight
+    fit_lab_alloc = check_lab_allocation() * lab_allocation_weight
 
     # Total fitness
     total_fit = (
@@ -275,7 +292,8 @@ def fitness(agent: Timetable):
         fit_prof_conf +
         fit_capacity +
         fit_week_dist +
-        fit_day_dist
+        fit_day_dist +
+        fit_lab_alloc
     )
-    print(f"fit: {total_fit} <- collisions: {fit_collisions}, professor conflicts: {fit_prof_conf}, capacity: {fit_capacity}, week distribution: {fit_week_dist}, day distribution: {fit_day_dist}")
+    print(f"fit: {total_fit} <- collisions: {fit_collisions}, professor conflicts: {fit_prof_conf}, capacity: {fit_capacity}, week distribution: {fit_week_dist}, day distribution: {fit_day_dist}, lab allocation: {fit_lab_alloc}")
     return total_fit

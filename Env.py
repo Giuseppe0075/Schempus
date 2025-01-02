@@ -11,15 +11,37 @@ class Professor:
     def __str__(self):
         return self.name
 
+class Subjects:
+    COMPUTER_SCIENCE = 0
+    PHYSICS = 1
+    MATH = 2
+    CHEMISTRY = 3
+    BIOLOGY = 4
+    HISTORY = 5
+    GEOGRAPHY = 6
+    ART = 7
+    MUSIC = 8
+    PHILOSOPHY = 9
+    ECONOMICS = 10
+    LITERATURE = 11
+    SOCIOLOGY = 12
+    PSYCHOLOGY = 13
+    ANTHROPOLOGY = 14
+    POLITICAL_SCIENCE = 15
+    LINGUISTICS = 16
+    ASTRONOMY = 17
+    STATISTICS = 18
+
 class Course:
     """This class represents a course in a university"""
 
-    def __init__(self, name, professor: Professor, number_of_students, hours_for_week, lab_hours = 0):
+    def __init__(self, name, professor: Professor, number_of_students, hours_for_week, subject, lab_hours = 0):
         """"This method initializes the course with the given name, professor, number of students for this particular course and hours for week"""
         self.name = name
         self.professor = professor
         self.number_of_students = number_of_students
         self.hours_for_week = hours_for_week
+        self.subject = subject
         self.lab_hours = lab_hours
 
     def __str__(self):
@@ -28,10 +50,13 @@ class Course:
 
 class Classroom:
     """This class represents a classroom in a university"""
-    def __init__(self, name, capacity):
-        """This method initializes the classroom with the given name and capacity"""
+    def __init__(self, name, capacity, is_lab = False, subject = None):
+        """This method initializes the classroom with the given name, capacity, wheter is laboratory or not and, if it is a laboratory, for which subject"""
         self.name = name
         self.capacity = capacity
+        self.is_lab = is_lab
+        if is_lab:
+            self.subject = subject
 
     def __str__(self):
         return f"{self.name}: {self.capacity}"
