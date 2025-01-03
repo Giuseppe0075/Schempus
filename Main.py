@@ -2,11 +2,11 @@ from Env import Timetable, Course, Classroom, Professor, Subjects
 import GA
 
 professors = [
-    Professor("di nucci", [[1, 2], [1, 3]]),
-    Professor("smith", [[2, 3], [3, 4]]),
-    Professor("johnson", [[2, 3], [3, 4]]),
-    Professor("lee", [[1, 2], [1, 3]]),
-    Professor("kim", [[2, 3], [3, 4]]),
+    Professor("di nucci"),
+    Professor("smith"),
+    Professor("johnson"),
+    Professor("lee"),
+    Professor("kim"),
 ]
 
 # Define courses and classrooms
@@ -50,27 +50,8 @@ classrooms = [
 def testing():
     agent1 = Timetable(classrooms, courses)
     timetable_data1 = [
-    [[4, 0, 4, False], [0, 0, 4, False], [2, 0, 1, False], [0, 0, 5, False], [1, 0, 0, False], [4, 0, 3, False], [2, 0, 0, False], [0, 0, 3, False]],
-    [[4, 0, 2, True], [4, 0, 0, True], [4, 0, 1, True], [3, 0, 0, False], [0, 0, 7, False], [0, 0, 6, False], [3, 0, 1, False]],
-    [[2, 3, 6, False], [2, 3, 5, False], [2, 3, 7, False], [1, 1, 1, False], [1, 1, 0, False], [2, 3, 4, False], [3, 4, 2, False], [0, 4, 0, False]],
-    [[1, 3, 6, True], [1, 3, 7, True], [1, 3, 5, True], [2, 1, 4, False], [2, 1, 5, False], [2, 1, 6, False], [0, 2, 3, False], [0, 2, 2, False], [3, 3, 6, False]],
-    [[0, 3, 6, False], [0, 3, 5, False], [4, 2, 2, False], [1, 3, 0, False], [0, 3, 7, False], [4, 2, 3, False]],
-    [[2, 0, 3, False], [0, 3, 0, False], [2, 0, 4, False], [0, 3, 1, False], [1, 0, 2, False], [2, 0, 5, False]],
-    [[2, 4, 7, False], [4, 4, 4, False], [2, 4, 5, False], [4, 4, 3, False], [1, 3, 3, False], [2, 4, 6, False]],
-    [[4, 2, 7, False], [1, 4, 2, False], [1, 4, 3, False], [1, 4, 4, False]],
-    [[1, 2, 2, False], [4, 1, 7, False], [4, 1, 6, False], [4, 1, 5, False]],
-    [[3, 0, 5, False], [3, 0, 6, False]],
-    [[1, 1, 6, False], [1, 1, 7, False], [1, 1, 5, False], [3, 1, 0, False]],
-    [[3, 2, 4, False], [1, 0, 6, False], [1, 0, 7, False], [3, 2, 6, False], [3, 2, 5, False], [4, 0, 7, False]],
-    [[1, 4, 6, False], [1, 4, 5, False], [4, 3, 1, False], [3, 4, 4, False], [1, 4, 7, False], [4, 3, 2, False]],
-    [[0, 4, 5, False], [3, 3, 5, False], [0, 4, 6, False], [3, 3, 4, False], [4, 4, 0, False], [0, 4, 4, False]],
-    [[1, 0, 3, False], [2, 2, 0, False], [2, 2, 1, False], [0, 0, 0, False], [2, 2, 2, False], [1, 0, 4, False], [0, 0, 1, False], [3, 2, 3, False]],
-    [[4, 1, 2, False], [3, 1, 5, False], [3, 1, 6, False], [3, 1, 7, False]],
-    [[0, 1, 1, True], [0, 1, 2, True], [0, 1, 3, True], [2, 4, 1, False], [2, 4, 3, False], [2, 4, 2, False], [1, 3, 4, False]],
-    [[0, 4, 2, False], [0, 4, 1, False], [0, 4, 3, False], [2, 0, 2, False]],
-    [[4, 3, 4, False], [4, 3, 3, False], [3, 2, 2, False], [2, 4, 0, False], [3, 2, 1, False], [3, 2, 0, False]],
-    [[0, 3, 3, True], [0, 3, 4, True], [0, 3, 2, True], [4, 0, 6, False], [1, 2, 6, False], [4, 0, 5, False], [1, 2, 5, False], [1, 2, 7, False], [2, 3, 3, False]],
-    [[4, 3, 5, True], [4, 3, 7, True], [4, 3, 6, True], [3, 3, 1, False], [3, 3, 3, False], [0, 2, 7, False], [3, 3, 2, False], [0, 2, 6, False], [1, 2, 4, False]]
+        [[1, 1, 3, False],[1, 1, 4, False]],
+        [[3, 1, 5, False],[3, 1, 6, False]]
 ]
 
 
@@ -87,7 +68,7 @@ if __name__ == "__main__":
     agents = [Timetable(classrooms, courses) for _ in range(50)]
 
     start_time = time.time()
-    result, fitness = GA.run(agents, generations=10000, mutation_rate=0.9, k=20, m=20)
+    result, fitness = GA.run(agents, generations=5000, mutation_rate=0.9, k=20, m=20)
     end_time = time.time()
 
     print(result.display_as_table())

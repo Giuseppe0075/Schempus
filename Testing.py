@@ -44,7 +44,7 @@ classrooms = [
     Classroom("p5", 90)
 ]
 
-STRING = "k-m"
+STRING = "Without elitism"
 
 def run_ga_test(_generations, mutation_rate, k, m):
     agents = [Timetable(classrooms, courses) for _ in range(50)]
@@ -56,11 +56,11 @@ def run_ga_test(_generations, mutation_rate, k, m):
 
 if __name__ == '__main__':
     # Numero di test
-    num_tests = 25
+    num_tests = 1
     # Numero di processi TOT da lanciare per ogni test
-    num_processes = 25
+    num_processes = 30
     # Numero di processi massimi in parallelo
-    max_workers = 10  # ad esempio 10
+    max_workers = 10
 
     # Pulisco il file dei risultati
     with open('results.txt', 'w'):
@@ -69,8 +69,8 @@ if __name__ == '__main__':
     # Creo la pool con concurrency limitata a max_workers
     pool = multiprocessing.Pool(processes=max_workers)
 
-    for j in range(11, num_tests + 1):
-        generations = 500
+    for j in range(1, num_tests + 1):
+        generations = 5000
 
         # Invio i job alla pool e mi salvo i riferimenti
         async_results = []
@@ -100,11 +100,11 @@ if __name__ == '__main__':
 
         plt.xlabel('Generation')
         plt.ylabel('Normalized Best Fitness')
-        plt.title(f'{STRING} k=m={j*2}')
+        plt.title(f'{STRING}')
         plt.grid(True)
         plt.xlim(0, generations-1)
         plt.ylim(0, 1)
-        plt.savefig(f'plots/{STRING}_{j*2}.png')
+        plt.savefig(f'plots/{STRING}.png')
         plt.close()
 
         # Calcolo e salvo la media dei fitness
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         if valid_results:
             mean_value = sum(valid_results) / len(valid_results)
             with open('results.txt', 'a') as f:
-                f.write(f"Mean {STRING} {j} generations: {mean_value}\n")
+                f.write(f"Mean {STRING}  generations: {mean_value}\n")
 
     # Chiudo la pool
     pool.close()

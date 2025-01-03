@@ -2,19 +2,32 @@ import copy
 import random as rd
 from collections import Counter
 from Env import Timetable
+import pickle
 
 NUMBER_OF_DAYS = 5
 NUMBER_OF_HOURS = 8
 
-def run(agents, generations=100, mutation_rate=0.9, k=20, m=20):
+
+def run(
+    agents,
+    generations=100,
+    mutation_rate=0.9,
+    k=20,
+    m=20,
+    update_callback=None,
+    stop_check=None
+):
     n_agents = len(agents)
     best_agent = agents[0]
     best_fit = fitness(agents[0])
-    best_fitness_values = []
-
     NUMBER_OF_CLASSES = len(agents[0].classrooms)
 
-    for i in range(1, generations):
+    for i in range(1, generations + 1):
+        # Early stop if needed:
+        if stop_check and stop_check():
+            # Return the best so far (or None, or however you want)
+            return best_agent, best_fit
+
         # Selection
         agents, fits = selection(agents, k, m)
 
@@ -23,15 +36,14 @@ def run(agents, generations=100, mutation_rate=0.9, k=20, m=20):
             if fit_val < best_fit:
                 best_agent = copy.deepcopy(agent)
                 best_fit = fit_val
-                # Save the best agent
-                with open("best_agent.txt", "w") as f:
-                    f.write(str(best_fit) + "\n")
-                    f.write(best_agent.display_as_table())
-                    f.write("\n" + str(best_agent))
+                # When you find a new best_agent
+                with open("best_agent.pkl", "wb") as f:
+                    pickle.dump(best_agent, f)
                 if best_fit == 0:
+                    if update_callback:
+                        update_callback(i, generations)
                     return best_agent, 0
 
-        best_fitness_values.append(best_fit)
         new_agents = [copy.deepcopy(best_agent)]
 
         # Crossover
@@ -55,10 +67,11 @@ def run(agents, generations=100, mutation_rate=0.9, k=20, m=20):
 
         agents = new_agents
 
-    # Normalize fitness values
-    normalized_fitness_values = [(fit_val / 1000) for fit_val in best_fitness_values]
+        # Update progress after each generation
+        if update_callback:
+            update_callback(i, generations)
 
-    return best_agent, best_fit # / 1000, normalized_fitness_values
+    return best_agent, best_fit
 
 
 def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation, number_of_mutations=1):
@@ -141,10 +154,10 @@ def fitness(agent: Timetable):
     """
     conflicts_weight = 20
     collisions_weight = 20
-    capacity_weight = 1
-    week_distribution_weight = 7.5
-    distribution_in_day_weight = 2.5
-    lab_allocation_weight = 10
+    capacity_weight = 1.5
+    week_distribution_weight = 5
+    distribution_in_day_weight = 6
+    lab_allocation_weight = 7
 
     # Total lessons
     all_courses = agent.timetable
@@ -182,11 +195,6 @@ def fitness(agent: Timetable):
             day_hour_counter = Counter(lesson_list)
             # If there are 2 or more lessons in a (day, hour) => conflict
             conflicts += sum(cnt - 1 for cnt in day_hour_counter.values() if cnt > 1)
-
-            # Count conflicts with free hours
-            for free_hour in prof.free_hours:
-                if free_hour in lesson_list:
-                    conflicts += 1
 
         return conflicts
 
