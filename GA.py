@@ -20,12 +20,13 @@ def run(
     n_agents = len(agents)
     best_agent = agents[0]
     best_fit = fitness(agents[0])
+    best_agents = []
     NUMBER_OF_CLASSES = len(agents[0].classrooms)
+    no_improvements = 0
 
     for i in range(1, generations + 1):
         # Early stop if needed:
         if stop_check and stop_check():
-            # Return the best so far (or None, or however you want)
             return best_agent, best_fit
 
         # Selection
@@ -34,6 +35,7 @@ def run(
         # Find the best agent
         for agent, fit_val in zip(agents, fits):
             if fit_val < best_fit:
+                no_improvements = 0
                 best_agent = copy.deepcopy(agent)
                 best_fit = fit_val
                 # When you find a new best_agent
@@ -43,8 +45,10 @@ def run(
                     if update_callback:
                         update_callback(i, generations)
                     return best_agent, 0
-
+        best_agents.append(best_agent)
         new_agents = [copy.deepcopy(best_agent)]
+        # for _ in range(min(no_improvements, 10)):
+        #     new_agents.append(copy.deepcopy(best_agent))
 
         # Crossover
         while len(new_agents) < n_agents:
@@ -71,7 +75,7 @@ def run(
         if update_callback:
             update_callback(i, generations)
 
-    return best_agent, best_fit
+    return best_agent, best_fit #, best_agents
 
 
 def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation, number_of_mutations=1):
@@ -83,9 +87,9 @@ def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation, numb
 
         # Mutate the lesson
         new_lesson = [
-            (old_lesson[0] + rd.randint(0, day_mutation)) % NUMBER_OF_DAYS,
-            (old_lesson[1] + rd.randint(0, class_mutation)) % len(agent.classrooms),
-            (old_lesson[2] + rd.randint(0, hour_mutation)) % NUMBER_OF_HOURS,
+            (old_lesson[0] + rd.randint(-day_mutation, day_mutation)) % NUMBER_OF_DAYS,
+            (old_lesson[1] + rd.randint(-class_mutation, class_mutation)) % len(agent.classrooms),
+            (old_lesson[2] + rd.randint(-hour_mutation, hour_mutation)) % NUMBER_OF_HOURS,
             old_lesson[3]
         ]
         agent.timetable[course_index][lesson_index] = new_lesson
@@ -100,8 +104,9 @@ def crossover(agent1: Timetable, agent2: Timetable):
     for i in range(len(child1.courses)):
         # Select a random point
         point = rd.randint(0, len(child1.timetable[i]) - 1)
+        end_point = rd.randint(point, len(child1.timetable[i]) - 1)
         # Swap lessons after the point, keeping the Lab field unchanged
-        for j in range(point, len(child1.timetable[i])):
+        for j in range(point, end_point):
             c1_lesson = child1.timetable[i][j]
             c2_lesson = child2.timetable[i][j]
             child1.timetable[i][j] = [c2_lesson[0], c2_lesson[1], c2_lesson[2], c1_lesson[3]]
@@ -152,8 +157,8 @@ def fitness(agent: Timetable):
     - weekly distribution
     - daily distribution
     """
-    conflicts_weight = 20
-    collisions_weight = 20
+    conflicts_weight = 100
+    collisions_weight = 100
     capacity_weight = 1.5
     week_distribution_weight = 5
     distribution_in_day_weight = 6

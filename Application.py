@@ -65,6 +65,11 @@ Course("Linguistics", professors[2], 55, 4, Subjects.LINGUISTICS),
 Course("Astronomy", professors[3], 85, 6, Subjects.ASTRONOMY),
 Course("Statistics", professors[4], 95, 9, Subjects.STATISTICS, 3),
 Course("Programming 1", professors[0], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
+Course("Programming 1", professors[1], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
+Course("Algorithms", professors[2], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
+Course("Data Structures", professors[4], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
+Course("Distributed Programming", professors[2], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
+Course("FIA", professors[3], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
 ]
 
 classrooms = [
@@ -194,7 +199,7 @@ class TimetableApp(tk.Tk):
                     print(f"Error loading timetable from {file_path}: {e}")
 
         # Schedule again in 3000 ms
-        self.after(3000, self.poll_best_agent_file)
+        self.after(1000, self.poll_best_agent_file)
 
     def redraw_timetable(self):
         """
@@ -227,8 +232,8 @@ class TimetableApp(tk.Tk):
         # Layout constants
         header_height = 30
         left_label_width = 60
-        col_width = 150
-        row_height = HOURS_PER_DAY * 30  # 8 hours * 30 px
+        col_width = 100
+        row_height = HOURS_PER_DAY * 20  # 8 hours * 30 px
 
         total_width = left_label_width + len(self.timetable.classrooms) * col_width
         total_height = header_height + 5 * row_height
@@ -242,7 +247,7 @@ class TimetableApp(tk.Tk):
             self.canvas.create_rectangle(x0, y0, x1, y1, fill="#cccccc", outline="black")
             self.canvas.create_text(
                 (x0 + x1) / 2, (y0 + y1) / 2,
-                text=classroom.name, font=("Arial", 10, "bold")
+                text=classroom.name, font=("Arial", 8, "bold")
             )
 
         # Day labels
@@ -254,7 +259,7 @@ class TimetableApp(tk.Tk):
             self.canvas.create_rectangle(x0, y0, x1, y1, fill="#dddddd", outline="black")
             self.canvas.create_text(
                 (x0 + x1) / 2, (y0 + y1) / 2,
-                text=DAYS[day_index], font=("Arial", 10, "bold")
+                text=DAYS[day_index], font=("Arial", 8, "bold")
             )
 
         # Grid lines
@@ -289,7 +294,7 @@ class TimetableApp(tk.Tk):
                         self.canvas.create_text(
                             (subcell_x0 + subcell_x1) / 2,
                             (subcell_y0 + subcell_y1) / 2,
-                            text="FREE", font=("Arial", 9)
+                            text="FREE", font=("Arial", 7)
                         )
                     else:
                         distinct_courses = set(ci for (ci, _) in collisions)
@@ -315,7 +320,7 @@ class TimetableApp(tk.Tk):
                                 (subcell_x0 + subcell_x1) / 2,
                                 (subcell_y0 + subcell_y1) / 2,
                                 text=text_content,
-                                font=("Arial", 9),
+                                font=("Arial", 7),
                                 width=col_width - 10
                             )
                         else:
@@ -337,7 +342,7 @@ class TimetableApp(tk.Tk):
                                 subcell_x0 + 5, subcell_y0 + 5,
                                 anchor="nw",
                                 text=text_content,
-                                font=("Arial", 9),
+                                font=("Arial", 7),
                                 width=col_width - 10
                             )
 
@@ -660,7 +665,7 @@ class TimetableApp(tk.Tk):
             agents = [Timetable(self.classrooms, self.courses) for _ in range(50)]
             best_timetable, best_fitness = GA.run(
                 agents,
-                generations=5000,
+                generations=10000,
                 mutation_rate=0.9,
                 k=20,
                 m=20,
