@@ -22,7 +22,6 @@ def run(
     best_fit = fitness(agents[0])
     best_agents = []
     NUMBER_OF_CLASSES = len(agents[0].classrooms)
-    no_improvements = 0
 
     for i in range(1, generations + 1):
         # Early stop if needed:
@@ -35,7 +34,6 @@ def run(
         # Find the best agent
         for agent, fit_val in zip(agents, fits):
             if fit_val < best_fit:
-                no_improvements = 0
                 best_agent = copy.deepcopy(agent)
                 best_fit = fit_val
                 # When you find a new best_agent
@@ -46,9 +44,7 @@ def run(
                         update_callback(i, generations)
                     return best_agent, 0
         best_agents.append(best_agent)
-        new_agents = [copy.deepcopy(best_agent)]
-        # for _ in range(min(no_improvements, 10)):
-        #     new_agents.append(copy.deepcopy(best_agent))
+        new_agents = []
 
         # Crossover
         while len(new_agents) < n_agents:
@@ -70,7 +66,7 @@ def run(
                 mutation(ag, day_mutation, class_mutation, hour_mutation)
 
         agents = new_agents
-
+        agents.append(best_agent)
         # Update progress after each generation
         if update_callback:
             update_callback(i, generations)
@@ -78,21 +74,20 @@ def run(
     return best_agent, best_fit #, best_agents
 
 
-def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation, number_of_mutations=1):
-    for _ in range(number_of_mutations):
-        # Select a random lesson
-        course_index = rd.randint(0, len(agent.timetable) - 1)
-        lesson_index = rd.randint(0, len(agent.timetable[course_index]) - 1)
-        old_lesson = agent.timetable[course_index][lesson_index]
+def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation):
+    # Select a random lesson
+    course_index = rd.randint(0, len(agent.timetable) - 1)
+    lesson_index = rd.randint(0, len(agent.timetable[course_index]) - 1)
+    old_lesson = agent.timetable[course_index][lesson_index]
 
-        # Mutate the lesson
-        new_lesson = [
-            (old_lesson[0] + rd.randint(-day_mutation, day_mutation)) % NUMBER_OF_DAYS,
-            (old_lesson[1] + rd.randint(-class_mutation, class_mutation)) % len(agent.classrooms),
-            (old_lesson[2] + rd.randint(-hour_mutation, hour_mutation)) % NUMBER_OF_HOURS,
-            old_lesson[3]
-        ]
-        agent.timetable[course_index][lesson_index] = new_lesson
+    # Mutate the lesson
+    new_lesson = [
+        (old_lesson[0] + rd.randint(-day_mutation, day_mutation)) % NUMBER_OF_DAYS,
+        (old_lesson[1] + rd.randint(-class_mutation, class_mutation)) % len(agent.classrooms),
+        (old_lesson[2] + rd.randint(-hour_mutation, hour_mutation)) % NUMBER_OF_HOURS,
+        old_lesson[3]
+    ]
+    agent.timetable[course_index][lesson_index] = new_lesson
 
 
 def crossover(agent1: Timetable, agent2: Timetable):
@@ -157,16 +152,15 @@ def fitness(agent: Timetable):
     - weekly distribution
     - daily distribution
     """
-    conflicts_weight = 100
-    collisions_weight = 100
+    collisions_weight = 60
+    conflicts_weight = 40
     capacity_weight = 1.5
-    week_distribution_weight = 5
-    distribution_in_day_weight = 6
-    lab_allocation_weight = 7
+    week_distribution_weight = 30
+    distribution_in_day_weight = 5
+    lab_allocation_weight = 60
 
     # Total lessons
     all_courses = agent.timetable
-    n_courses = len(all_courses)
 
     # -------------------------------------------------------------------
     # 1. Count collisions (same classroom and same hour)
@@ -215,6 +209,8 @@ def fitness(agent: Timetable):
                 error = course_students - class_capacity
                 if error > 0:
                     total_error += error
+                else:
+                    total_error -= error/50
         return total_error
 
     # -------------------------------------------------------------------
@@ -247,7 +243,7 @@ def fitness(agent: Timetable):
                 lab_hours = [l for l in lab_lessons if l[0] == day]
                 if theory_hours and lab_hours:
                     # penalize overlap in the day
-                    total_error += min(len(theory_hours), len(lab_hours))
+                    total_error += len(theory_hours) + len(lab_hours)
 
         return total_error
 
@@ -270,7 +266,7 @@ def fitness(agent: Timetable):
                 classes_in_day = set(lesson[1] for lesson in course if lesson[0] == day)
                 if len(classes_in_day) > 1:
                     # penalize classroom change
-                    total_error += len(classes_in_day) - 1
+                    total_error += (len(classes_in_day) - 1) * 5
 
         return total_error
 

@@ -54,12 +54,6 @@ Course("History", professors[1], 80, 6, Subjects.HISTORY),
 Course("Geography", professors[2], 90, 4, Subjects.GEOGRAPHY),
 Course("Art", professors[3], 60, 4, Subjects.ART),
 Course("Music", professors[4], 50, 2, Subjects.MUSIC),
-Course("Philosophy", professors[0], 60, 4, Subjects.PHILOSOPHY),
-Course("Economics", professors[1], 80, 6, Subjects.ECONOMICS),
-Course("Literature", professors[2], 70, 6, Subjects.LITERATURE),
-Course("Sociology", professors[3], 85, 6, Subjects.SOCIOLOGY),
-Course("Psychology", professors[4], 90, 8, Subjects.PSYCHOLOGY),
-Course("Anthropology", professors[0], 65, 4, Subjects.ANTHROPOLOGY),
 Course("Political Science", professors[1], 75, 7, Subjects.POLITICAL_SCIENCE, 3),
 Course("Linguistics", professors[2], 55, 4, Subjects.LINGUISTICS),
 Course("Astronomy", professors[3], 85, 6, Subjects.ASTRONOMY),
@@ -78,7 +72,8 @@ classrooms = [
     Classroom("p3", 100),
     Classroom("p4", 150),
     Classroom("p5", 90),
-    Classroom("labCS", 200, True, Subjects.COMPUTER_SCIENCE),
+    Classroom("labCS1", 200, True, Subjects.COMPUTER_SCIENCE),
+    Classroom("labCS2", 200, True, Subjects.COMPUTER_SCIENCE),
     Classroom("labS", 95, True, Subjects.STATISTICS),
     Classroom("labPS", 90, True, Subjects.POLITICAL_SCIENCE),
     Classroom("labM", 200, True, Subjects.MATH),
@@ -116,7 +111,7 @@ class TimetableApp(tk.Tk):
 
         self.color_map = None
         self.title("University Timetable Generator")
-        self.geometry("600x400")
+        self.geometry("1600x1100")
 
         welcome_label = tk.Label(self, text="Welcome to the University Timetable Generator!")
         welcome_label.pack(pady=20)
@@ -135,6 +130,10 @@ class TimetableApp(tk.Tk):
 
         calculate_tt_button = tk.Button(button_frame, text="Calculate Timetable", command=self.calculate_timetable)
         calculate_tt_button.grid(row=0, column=3, padx=5)
+
+        # Delete the best_agent.pkl file if it exists
+        if os.path.exists("best_agent.pkl"):
+            os.remove("best_agent.pkl")
 
         # Data placeholders
         self.professors = professors
@@ -194,14 +193,14 @@ class TimetableApp(tk.Tk):
                         new_best_timetable = pickle.load(f)
                     # Assign & redraw
                     self.timetable = new_best_timetable
-                    self.redraw_timetable()
+                    self.draw_timetable()
                 except Exception as e:
                     print(f"Error loading timetable from {file_path}: {e}")
 
         # Schedule again in 3000 ms
         self.after(1000, self.poll_best_agent_file)
 
-    def redraw_timetable(self):
+    def draw_timetable(self):
         """
         Clears and re-draws the timetable in 'self.canvas' using 'self.timetable'.
         We reuse 'self.color_map' to keep colors consistent.
@@ -620,7 +619,9 @@ class TimetableApp(tk.Tk):
         if not self.professors or not self.courses or not self.classrooms:
             messagebox.showinfo("Data Missing", "Please add Professors, Courses, and Classrooms first.")
             return
-        self.color_map = _generate_course_colors(len(self.courses))
+
+        if not self.color_map:
+            self.color_map = _generate_course_colors(len(self.courses))
         
         # Create a popup for progress
         progress_window = tk.Toplevel(self)
@@ -662,13 +663,16 @@ class TimetableApp(tk.Tk):
             return self._stop_ga  # True if user pressed Stop
 
         def worker():
-            agents = [Timetable(self.classrooms, self.courses) for _ in range(50)]
+            if(self.timetable == None):
+                agents = [Timetable(self.classrooms, self.courses) for _ in range(100)]
+            else:
+                agents = [self.timetable for _ in range(100)]
             best_timetable, best_fitness = GA.run(
                 agents,
-                generations=10000,
+                generations=1000,
                 mutation_rate=0.9,
-                k=20,
-                m=20,
+                k=40,
+                m=40,
                 update_callback=update_progress,
                 stop_check=stop_check
             )
