@@ -6,7 +6,10 @@ import pickle
 
 NUMBER_OF_DAYS = 5
 NUMBER_OF_HOURS = 8
-
+NUMBER_OF_CLASSES = 0
+DAY_MUTATION = int(NUMBER_OF_DAYS + 1/2)
+HOUR_MUTATION = int(NUMBER_OF_HOURS + 1/2)
+CLASS_MUTATION = 0
 
 def run(
     agents,
@@ -21,9 +24,16 @@ def run(
     best_agent = agents[0]
     best_fit = fitness(agents[0])
     best_agents = []
+    best_fits = []
+    global NUMBER_OF_CLASSES
+    global CLASS_MUTATION
     NUMBER_OF_CLASSES = len(agents[0].classrooms)
+    CLASS_MUTATION = int(NUMBER_OF_CLASSES + 1/2)
 
     for i in range(1, generations + 1):
+
+        print(f"Generation {i}/{generations}")
+
         # Early stop if needed:
         if stop_check and stop_check():
             return best_agent, best_fit
@@ -39,11 +49,14 @@ def run(
                 # When you find a new best_agent
                 with open("best_agent.pkl", "wb") as f:
                     pickle.dump(best_agent, f)
+                with open("best_agent.txt", "w") as f:
+                    f.write(str(best_agent))
                 if best_fit == 0:
                     if update_callback:
                         update_callback(i, generations)
                     return best_agent, 0
         best_agents.append(best_agent)
+        best_fits.append(best_fit)
         new_agents = []
 
         # Crossover
@@ -55,15 +68,12 @@ def run(
             if len(new_agents) < n_agents:
                 new_agents.append(child2)
 
-        # Calculate mutation ranges based on generation progress
-        day_mutation = NUMBER_OF_DAYS - int(NUMBER_OF_DAYS / (generations / i))
-        class_mutation = NUMBER_OF_CLASSES - int(NUMBER_OF_CLASSES / (generations / i))
-        hour_mutation = NUMBER_OF_HOURS - int(NUMBER_OF_HOURS / (generations / i))
-
+        # Calculate the temperature
+        temperature = (generations - i) / generations
         # Mutation
         for ag in new_agents:
             if rd.random() < mutation_rate:
-                mutation(ag, day_mutation, class_mutation, hour_mutation)
+                mutation(ag, temperature)
 
         agents = new_agents
         agents.append(best_agent)
@@ -71,23 +81,70 @@ def run(
         if update_callback:
             update_callback(i, generations)
 
-    return best_agent, best_fit #, best_agents
+    return best_agent, best_fit , best_fits
 
 
-def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation):
-    # Select a random lesson
+def mutation(agent: Timetable, temperature):
+
+    # 1. Seleziona un corso e una lezione a caso
     course_index = rd.randint(0, len(agent.timetable) - 1)
     lesson_index = rd.randint(0, len(agent.timetable[course_index]) - 1)
-    old_lesson = agent.timetable[course_index][lesson_index]
+    old_lesson = agent.timetable[course_index][lesson_index].copy()  # copia di old_lesson
+    new_lesson = old_lesson.copy()
 
-    # Mutate the lesson
-    new_lesson = [
-        (old_lesson[0] + rd.randint(-day_mutation, day_mutation)) % NUMBER_OF_DAYS,
-        (old_lesson[1] + rd.randint(-class_mutation, class_mutation)) % len(agent.classrooms),
-        (old_lesson[2] + rd.randint(-hour_mutation, hour_mutation)) % NUMBER_OF_HOURS,
-        old_lesson[3]
-    ]
-    agent.timetable[course_index][lesson_index] = new_lesson
+    if rd.random() < temperature:
+        new_lesson = [
+            (new_lesson[0] + rd.randint(-DAY_MUTATION, DAY_MUTATION)) % NUMBER_OF_DAYS,
+            new_lesson[1],
+            new_lesson[2],
+            new_lesson[3]
+        ]
+
+    if rd.random() < 1 - temperature * 0.67:
+        # Mutazione "fine" sull'ora
+        new_lesson = [
+            new_lesson[0],
+            new_lesson[1],
+            (new_lesson[2] + rd.randint(-HOUR_MUTATION, HOUR_MUTATION)) % NUMBER_OF_HOURS,
+            new_lesson[3]
+        ]
+    # Altrimenti canbia le classi
+    if rd.random() < 1 - temperature * 0.33:
+        # Mutazione "fine" sulla classe
+        new_lesson = [
+            new_lesson[0],
+            (new_lesson[1] + rd.randint(-CLASS_MUTATION, CLASS_MUTATION)) % NUMBER_OF_CLASSES,
+            new_lesson[2],
+            new_lesson[3]
+        ]
+
+    # 3. Verifica se esiste già una lezione con [day, classroom, hour] == new_lesson[:3]
+    found = False
+    for i in range(len(agent.timetable)):
+        for j in range(len(agent.timetable[i])):
+            lesson = agent.timetable[i][j]
+            # Confronto solo day, classroom, hour
+            if (lesson[0] == new_lesson[0] and
+                    lesson[1] == new_lesson[1] and
+                    lesson[2] == new_lesson[2]):
+                # 3a. Se esiste, fai swap solo dei primi 3 elementi
+                temp_coords = old_lesson[:3]  # salva [day, classroom, hour] di old_lesson
+
+                # Aggiorna la lezione originale con i primi 3 elementi della lezione trovata
+                agent.timetable[course_index][lesson_index][:3] = lesson[:3]
+
+                # Aggiorna la lezione trovata con i primi 3 elementi di old_lesson
+                agent.timetable[i][j][:3] = temp_coords
+
+                found = True
+                break
+        if found:
+            break
+
+    # 4. Se non è stata trovata nessuna lezione con i parametri [day, classroom, hour],
+    #    effettua un semplice rimpiazzo di old_lesson con new_lesson.
+    if not found:
+        agent.timetable[course_index][lesson_index] = new_lesson
 
 
 def crossover(agent1: Timetable, agent2: Timetable):
@@ -95,17 +152,13 @@ def crossover(agent1: Timetable, agent2: Timetable):
     child1 = copy.deepcopy(agent1)
     child2 = copy.deepcopy(agent2)
 
-    # For each course
-    for i in range(len(child1.courses)):
-        # Select a random point
-        point = rd.randint(0, len(child1.timetable[i]) - 1)
-        end_point = rd.randint(point, len(child1.timetable[i]) - 1)
-        # Swap lessons after the point, keeping the Lab field unchanged
-        for j in range(point, end_point):
-            c1_lesson = child1.timetable[i][j]
-            c2_lesson = child2.timetable[i][j]
-            child1.timetable[i][j] = [c2_lesson[0], c2_lesson[1], c2_lesson[2], c1_lesson[3]]
-            child2.timetable[i][j] = [c1_lesson[0], c1_lesson[1], c1_lesson[2], c2_lesson[3]]
+    # Swap 2 courses between the agents
+    i = rd.randint(0, len(child1.courses) - 1)
+    for j in range(len(child1.timetable[i])):
+        c1_lesson = child1.timetable[i][j]
+        c2_lesson = child2.timetable[i][j]
+        child1.timetable[i][j] = [c2_lesson[0], c2_lesson[1], c2_lesson[2], c1_lesson[3]]
+        child2.timetable[i][j] = [c1_lesson[0], c1_lesson[1], c1_lesson[2], c2_lesson[3]]
 
     return child1, child2
 
@@ -153,11 +206,11 @@ def fitness(agent: Timetable):
     - daily distribution
     """
     collisions_weight = 60
-    conflicts_weight = 40
-    capacity_weight = 1.5
+    conflicts_weight = 10
+    capacity_weight = 1
     week_distribution_weight = 30
-    distribution_in_day_weight = 5
-    lab_allocation_weight = 60
+    distribution_in_day_weight = 10
+    lab_allocation_weight = 71
 
     # Total lessons
     all_courses = agent.timetable
@@ -210,7 +263,7 @@ def fitness(agent: Timetable):
                 if error > 0:
                     total_error += error
                 else:
-                    total_error -= error/50
+                    total_error -= error/100
         return total_error
 
     # -------------------------------------------------------------------
@@ -304,5 +357,5 @@ def fitness(agent: Timetable):
         fit_day_dist +
         fit_lab_alloc
     )
-    print(f"fit: {total_fit} <- collisions: {fit_collisions}, professor conflicts: {fit_prof_conf}, capacity: {fit_capacity}, week distribution: {fit_week_dist}, day distribution: {fit_day_dist}, lab allocation: {fit_lab_alloc}")
+    # print(f"fit: {total_fit} <- collisions: {fit_collisions}, professor conflicts: {fit_prof_conf}, capacity: {fit_capacity}, week distribution: {fit_week_dist}, day distribution: {fit_day_dist}, lab allocation: {fit_lab_alloc}")
     return total_fit
