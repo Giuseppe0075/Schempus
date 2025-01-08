@@ -7,9 +7,6 @@ import pickle
 NUMBER_OF_DAYS = 5
 NUMBER_OF_HOURS = 8
 NUMBER_OF_CLASSES = 0
-DAY_MUTATION = int(NUMBER_OF_DAYS + 1/2)
-HOUR_MUTATION = int(NUMBER_OF_HOURS + 1/2)
-CLASS_MUTATION = 0
 
 def run(
     agents,
@@ -26,13 +23,11 @@ def run(
     best_agents = []
     best_fits = []
     global NUMBER_OF_CLASSES
-    global CLASS_MUTATION
     NUMBER_OF_CLASSES = len(agents[0].classrooms)
-    CLASS_MUTATION = int(NUMBER_OF_CLASSES + 1/2)
 
     for i in range(1, generations + 1):
 
-        print(f"Generation {i}/{generations}")
+        # print(f"Generation {i}/{generations}")
 
         # Early stop if needed:
         if stop_check and stop_check():
@@ -68,12 +63,15 @@ def run(
             if len(new_agents) < n_agents:
                 new_agents.append(child2)
 
-        # Calculate the temperature
-        temperature = (generations - i) / generations
+        # Calculate mutation ranges based on generation progress
+        day_mutation = NUMBER_OF_DAYS - int(NUMBER_OF_DAYS / (generations / i))
+        class_mutation = NUMBER_OF_CLASSES - int(NUMBER_OF_CLASSES / (generations / i))
+        hour_mutation = NUMBER_OF_HOURS - int(NUMBER_OF_HOURS / (generations / i))
+
         # Mutation
         for ag in new_agents:
             if rd.random() < mutation_rate:
-                mutation(ag, temperature)
+                mutation(ag, day_mutation, class_mutation, hour_mutation)
 
         agents = new_agents
         agents.append(best_agent)
@@ -83,57 +81,36 @@ def run(
 
     return best_agent, best_fit , best_fits
 
-
-def mutation(agent: Timetable, temperature):
-
-    # 1. Seleziona un corso e una lezione a caso
+def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation):
+    # Select a random lesson
     course_index = rd.randint(0, len(agent.timetable) - 1)
     lesson_index = rd.randint(0, len(agent.timetable[course_index]) - 1)
-    old_lesson = agent.timetable[course_index][lesson_index].copy()  # copia di old_lesson
-    new_lesson = old_lesson.copy()
+    old_lesson = agent.timetable[course_index][lesson_index]
 
-    if rd.random() < temperature:
-        new_lesson = [
-            (new_lesson[0] + rd.randint(-DAY_MUTATION, DAY_MUTATION)) % NUMBER_OF_DAYS,
-            new_lesson[1],
-            new_lesson[2],
-            new_lesson[3]
-        ]
+    # Mutate the lesson
+    new_lesson = [
+        (old_lesson[0] + rd.randint(-day_mutation, day_mutation)) % NUMBER_OF_DAYS,
+        (old_lesson[1] + rd.randint(-class_mutation, class_mutation)) % len(agent.classrooms),
+        (old_lesson[2] + rd.randint(-hour_mutation, hour_mutation)) % NUMBER_OF_HOURS,
+        old_lesson[3]
+    ]
 
-    if rd.random() < 1 - temperature * 0.67:
-        # Mutazione "fine" sull'ora
-        new_lesson = [
-            new_lesson[0],
-            new_lesson[1],
-            (new_lesson[2] + rd.randint(-HOUR_MUTATION, HOUR_MUTATION)) % NUMBER_OF_HOURS,
-            new_lesson[3]
-        ]
-    # Altrimenti canbia le classi
-    if rd.random() < 1 - temperature * 0.33:
-        # Mutazione "fine" sulla classe
-        new_lesson = [
-            new_lesson[0],
-            (new_lesson[1] + rd.randint(-CLASS_MUTATION, CLASS_MUTATION)) % NUMBER_OF_CLASSES,
-            new_lesson[2],
-            new_lesson[3]
-        ]
-
-    # 3. Verifica se esiste già una lezione con [day, classroom, hour] == new_lesson[:3]
+    # Check if there is already a lesson with the same day, classroom, and hour as the new lesson
     found = False
     for i in range(len(agent.timetable)):
         for j in range(len(agent.timetable[i])):
             lesson = agent.timetable[i][j]
-            # Confronto solo day, classroom, hour
+            # Compare only day, classroom, and hour
             if (lesson[0] == new_lesson[0] and
                     lesson[1] == new_lesson[1] and
                     lesson[2] == new_lesson[2]):
-                # 3a. Se esiste, fai swap solo dei primi 3 elementi
-                temp_coords = old_lesson[:3]  # salva [day, classroom, hour] di old_lesson
+                # If found, swap only the first 3 elements (day, classroom, hour)
+                temp_coords = old_lesson[:3]  # Save [day, classroom, hour] of old_lesson
 
-                # Aggiorna la lezione originale con i primi 3 elementi della lezione trovata
+                # Update the original lesson with the first 3 elements of the found lesson
                 agent.timetable[course_index][lesson_index][:3] = lesson[:3]
 
-                # Aggiorna la lezione trovata con i primi 3 elementi di old_lesson
+                # Update the found lesson with the first 3 elements of old_lesson
                 agent.timetable[i][j][:3] = temp_coords
 
                 found = True
@@ -141,8 +118,8 @@ def mutation(agent: Timetable, temperature):
         if found:
             break
 
-    # 4. Se non è stata trovata nessuna lezione con i parametri [day, classroom, hour],
-    #    effettua un semplice rimpiazzo di old_lesson con new_lesson.
+    # If no lesson with the same day, classroom, and hour is found,
+    # replace old_lesson with new_lesson.
     if not found:
         agent.timetable[course_index][lesson_index] = new_lesson
 
@@ -357,5 +334,5 @@ def fitness(agent: Timetable):
         fit_day_dist +
         fit_lab_alloc
     )
-    # print(f"fit: {total_fit} <- collisions: {fit_collisions}, professor conflicts: {fit_prof_conf}, capacity: {fit_capacity}, week distribution: {fit_week_dist}, day distribution: {fit_day_dist}, lab allocation: {fit_lab_alloc}")
+    print(f"fit: {total_fit} <- collisions: {fit_collisions}, professor conflicts: {fit_prof_conf}, capacity: {fit_capacity}, week distribution: {fit_week_dist}, day distribution: {fit_day_dist}, lab allocation: {fit_lab_alloc}")
     return total_fit
