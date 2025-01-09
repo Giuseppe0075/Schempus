@@ -34,51 +34,87 @@ SUBJECT_NAMES = {
     Subjects.STATISTICS: "STATISTICS",
 }
 
-professors = [
-    Professor("di nucci"),
-    Professor("smith"),
-    Professor("johnson"),
-    Professor("lee"),
-    Professor("kim"),
-]
-
-# Define courses and classrooms
+# Example first semester UNISA 2024/25
+professors = {
+    "ZIZZA": Professor("ZIZZA"),
+    "D'ANGELO": Professor("D'ANGELO"),
+    "NICOTERA": Professor("NICOTERA"),
+    "TUCCI": Professor("TUCCI"),
+    "DE MARCO": Professor("DE MARCO"),
+    "LAPENTA": Professor("LAPENTA"),
+    "TOTA": Professor("TOTA"),
+    "NAPPI": Professor("NAPPI"),
+    "CASTIGLIONE": Professor("CASTIGLIONE"),
+    "MASUCCI": Professor("MASUCCI"),
+    "VINCENZI": Professor("VINCENZI"),
+    "NARDUCCI": Professor("NARDUCCI"),
+    "RESCIGNO": Professor("RESCIGNO"),
+    "LA TORRE": Professor("LA TORRE"),
+    "TORTORA": Professor("TORTORA"),
+    "CARPENTIERI": Professor("CARPENTIERI"),
+    "FICCO": Professor("FICCO"),
+    "POLESE": Professor("POLESE"),
+    "CATTANEO": Professor("CATTANEO"),
+    "DEUFEMIA": Professor("DEUFEMIA"),
+    "SEBILLO": Professor("SEBILLO"),
+    "DE LUCIA": Professor("DE LUCIA"),
+    "SCARANO": Professor("SCARANO"),
+    "FERRUCCI": Professor("FERRUCCI"),
+    "MALANDRINO": Professor("MALANDRINO"),
+    "GRAVINO": Professor("GRAVINO"),
+    "COSENZA": Professor("COSENZA"),
+    "DE BONIS": Professor("DE BONIS"),
+    "PALOMBA": Professor("PALOMBA"),
+    "DE PRISCO": Professor("DE PRISCO"),
+    "ROMEO": Professor("ROMEO"),
+}
 courses = [
-Course("ETC", professors[0], 200, 8, Subjects.COMPUTER_SCIENCE),
-Course("Math", professors[1], 190, 7, Subjects.MATH, 3),
-Course("Physics", professors[2], 75, 8, Subjects.PHYSICS),
-Course("Programming", professors[3], 75, 9, Subjects.COMPUTER_SCIENCE, 3),
-Course("Chemistry", professors[4], 100, 6, Subjects.CHEMISTRY),
-Course("Biology", professors[0], 120, 6, Subjects.BIOLOGY),
-Course("History", professors[1], 80, 6, Subjects.HISTORY),
-Course("Geography", professors[2], 90, 4, Subjects.GEOGRAPHY),
-Course("Art", professors[3], 60, 4, Subjects.ART),
-Course("Music", professors[4], 50, 2, Subjects.MUSIC),
-Course("Political Science", professors[1], 75, 7, Subjects.POLITICAL_SCIENCE, 3),
-Course("Linguistics", professors[2], 55, 4, Subjects.LINGUISTICS),
-Course("Astronomy", professors[3], 85, 6, Subjects.ASTRONOMY),
-Course("Statistics", professors[4], 95, 9, Subjects.STATISTICS, 3),
-Course("Programming 1", professors[0], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
-Course("Programming 1", professors[1], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
-Course("Algorithms", professors[2], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
-Course("Data Structures", professors[4], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
-Course("Distributed Programming", professors[2], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
-Course("FIA", professors[3], 100, 9, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Programmazione I (A-C)", professors["ZIZZA"], 200, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Matematica Discreta (A-C)", professors["NICOTERA"], 200, 6, Subjects.MATH),
+    Course("Architettura degli Elaboratori (A-C)", professors["D'ANGELO"], 200, 6, Subjects.COMPUTER_SCIENCE),
+    Course("Programmazione I (D-G)", professors["TUCCI"], 200, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Matematica Discreta (D-G)", professors["LAPENTA"], 200, 6, Subjects.MATH),
+    Course("Architettura degli Elaboratori (D-G)", professors["DE MARCO"], 200, 6, Subjects.COMPUTER_SCIENCE),
+    Course("Programmazione I (H-PET)", professors["NAPPI"], 200, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Matematica Discreta (H-PET)", professors["TOTA"], 200, 6, Subjects.MATH),
+    Course("Architettura degli Elaboratori (H-PET)", professors["CASTIGLIONE"], 200, 6, Subjects.COMPUTER_SCIENCE),
+    Course("Programmazione I (PEU-Z)", professors["NARDUCCI"], 200, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Matematica Discreta (PEU-Z)", professors["VINCENZI"], 200, 6, Subjects.MATH),
+    Course("Architettura degli Elaboratori (PEU-Z)", professors["RESCIGNO"], 200, 6, Subjects.COMPUTER_SCIENCE),
+    Course("Sistemi Operativi (Resto 0)", professors["LA TORRE"], 160, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Programmazione Object Oriented (Resto 0)", professors["TORTORA"], 160, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Basi di Dati (Resto 0)", professors["CARPENTIERI"], 160, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Sistemi Operativi (Resto 1)", professors["FICCO"], 160, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Programmazione Object Oriented (Resto 1)", professors["POLESE"], 160, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Basi di Dati (Resto 1)", professors["CATTANEO"], 160, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Sistemi Operativi (Resto 2)", professors["DEUFEMIA"], 160, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Programmazione Object Oriented (Resto 2)", professors["SEBILLO"], 160, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Basi di Dati (Resto 2)", professors["SEBILLO"], 160, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Ingegneria del Software (Resto 0)", professors["DE LUCIA"], 150, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Programmazione Distribuita (Resto 0)", professors["SCARANO"], 150, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Ingegneria del Software (Resto 1)", professors["FERRUCCI"], 150, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Programmazione Distribuita (Resto 1)", professors["MALANDRINO"], 150, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Ingegneria del Software (Resto 2)", professors["GRAVINO"], 150, 6, Subjects.COMPUTER_SCIENCE),
+    Course("Programmazione Distribuita (Resto 2)", professors["COSENZA"], 150, 7, Subjects.COMPUTER_SCIENCE, 3),
+    Course("Fondamenti di Intelligenza Artificiale", professors["PALOMBA"], 180, 4, Subjects.COMPUTER_SCIENCE),
+    Course("Programmazione Avanzata", professors["DE BONIS"], 20, 4, Subjects.COMPUTER_SCIENCE),
+    Course("Machine Learning", professors["POLESE"],60, 4, Subjects.COMPUTER_SCIENCE),
+    Course("Mobile Programming",professors["DE PRISCO"], 90, 4, Subjects.COMPUTER_SCIENCE),
+    Course("Musimatica", professors["DE PRISCO"], 90, 4, Subjects.COMPUTER_SCIENCE),
+    Course("Fisica", professors["ROMEO"], 40, 4, Subjects.PHYSICS),
 ]
-
 classrooms = [
-    Classroom("p1", 200),
-    Classroom("p2", 75),
-    Classroom("p3", 100),
-    Classroom("p4", 150),
-    Classroom("p5", 90),
-    Classroom("labCS1", 200, True, Subjects.COMPUTER_SCIENCE),
-    Classroom("labCS2", 200, True, Subjects.COMPUTER_SCIENCE),
-    Classroom("labS", 95, True, Subjects.STATISTICS),
-    Classroom("labPS", 90, True, Subjects.POLITICAL_SCIENCE),
-    Classroom("labM", 200, True, Subjects.MATH),
+    Classroom("P3", 200),
+    Classroom("P4", 200),
+    Classroom("F8", 200),
+    Classroom("F1", 200),
+    Classroom("F4", 150),
+    Classroom("P6", 100),
+    Classroom("P13", 200, True, Subjects.COMPUTER_SCIENCE),
+    Classroom("Hopper", 200, True, Subjects.COMPUTER_SCIENCE),
+    Classroom("Sammet", 200, True, Subjects.COMPUTER_SCIENCE),
 ]
-
+# End Example
 
 def toggle_subject_field(subject_combobox, is_lab_var):
     """
@@ -131,14 +167,20 @@ class TimetableApp(tk.Tk):
         calculate_tt_button = tk.Button(button_frame, text="Calculate Timetable", command=self.calculate_timetable)
         calculate_tt_button.grid(row=0, column=3, padx=5)
 
+        use_example_data_button = tk.Button(button_frame, text="Use Example Data", command=self.use_example_data)
+        use_example_data_button.grid(row=0, column=4, padx=5)
+
+        show_time_table_button = tk.Button(button_frame, text="Show Timetable", command=self.show_timetable)
+        show_time_table_button.grid(row=0, column=5, padx=5)
+
         # Delete the best_agent.pkl file if it exists
         if os.path.exists("best_agent.pkl"):
             os.remove("best_agent.pkl")
 
         # Data placeholders
-        self.professors = professors
-        self.courses = courses
-        self.classrooms = classrooms
+        self.professors = []
+        self.courses = []
+        self.classrooms = []
 
         # This is your Timetable object, which has .timetable inside
         self.timetable = None
@@ -174,8 +216,23 @@ class TimetableApp(tk.Tk):
         self.canvas.bind_all("<MouseWheel>", _on_mousewheel)
         self.canvas.bind_all("<Shift-MouseWheel>", _on_shiftmousewheel)
 
-        # Start polling the file every 3 seconds
-        self.after(3000, self.poll_best_agent_file)
+    def use_example_data(self):
+        """Use example data for professors, courses, and classrooms."""
+        self.professors = professors
+        self.courses = courses
+        self.classrooms = classrooms
+        self.show_timetable()
+
+    def show_timetable(self):
+        """
+        Generate a random timetable and display it.
+        """
+        if self.timetable is None:
+            self.timetable = Timetable(self.classrooms, self.courses)
+        self.draw_timetable()
+        with open("best_agent.pkl", "wb") as f:
+            pickle.dump(self.timetable, f)
+        self.timetable = None
 
     def poll_best_agent_file(self):
         """
@@ -204,6 +261,7 @@ class TimetableApp(tk.Tk):
         """
         Clears and re-draws the timetable in 'self.canvas' using 'self.timetable'.
         We reuse 'self.color_map' to keep colors consistent.
+        Now we also display the professor’s name for each lesson.
         """
         self.canvas.delete("all")  # Clear previous drawing
 
@@ -219,11 +277,8 @@ class TimetableApp(tk.Tk):
             for (day, c_idx, hour, lab) in lessons:
                 lessons_by_slot[(day, c_idx, hour)].append((course_index, lab))
 
-        # Instead of regenerating a random map each time, we use self.color_map:
-        # if you haven't set self.color_map yet, you can do a safety check:
+        # If we haven't already set a color_map, create it once.
         if not self.color_map:
-            # If it doesn't exist yet, generate it once. But ideally,
-            # you generate it right after you've finalized your courses.
             self.color_map = _generate_course_colors(len(self.timetable.courses))
 
         color_map = self.color_map  # Reuse the same map each time
@@ -231,13 +286,14 @@ class TimetableApp(tk.Tk):
         # Layout constants
         header_height = 30
         left_label_width = 60
-        col_width = 100
-        row_height = HOURS_PER_DAY * 20  # 8 hours * 30 px
+        col_width = 200
+        row_height = HOURS_PER_DAY * 30
+        font_size = 10
 
         total_width = left_label_width + len(self.timetable.classrooms) * col_width
         total_height = header_height + 5 * row_height
 
-        # Draw classroom headers
+        # 1) Draw classroom headers
         for c_index, classroom in enumerate(self.timetable.classrooms):
             x0 = left_label_width + c_index * col_width
             x1 = x0 + col_width
@@ -246,10 +302,10 @@ class TimetableApp(tk.Tk):
             self.canvas.create_rectangle(x0, y0, x1, y1, fill="#cccccc", outline="black")
             self.canvas.create_text(
                 (x0 + x1) / 2, (y0 + y1) / 2,
-                text=classroom.name, font=("Arial", 8, "bold")
+                text=classroom.name, font=("Arial", font_size, "bold")
             )
 
-        # Day labels
+        # 2) Day labels on the left
         for day_index in range(5):
             x0 = 0
             x1 = left_label_width
@@ -258,10 +314,10 @@ class TimetableApp(tk.Tk):
             self.canvas.create_rectangle(x0, y0, x1, y1, fill="#dddddd", outline="black")
             self.canvas.create_text(
                 (x0 + x1) / 2, (y0 + y1) / 2,
-                text=DAYS[day_index], font=("Arial", 8, "bold")
+                text=DAYS[day_index], font=("Arial", font_size, "bold")
             )
 
-        # Grid lines
+        # 3) Grid lines (horizontal per hour, vertical per classroom)
         for day_index in range(5):
             top_y = header_height + day_index * row_height
             for hour in range(HOURS_PER_DAY + 1):
@@ -272,13 +328,14 @@ class TimetableApp(tk.Tk):
             x = left_label_width + c_index * col_width
             self.canvas.create_line(x, 0, x, total_height, fill="black")
 
-        # Fill subcells
+        # 4) Fill each subcell (day, hour, classroom)
         cell_height = row_height / HOURS_PER_DAY
         for day_index in range(5):
             day_top_y = header_height + day_index * row_height
             for hour in range(HOURS_PER_DAY):
                 subcell_y0 = day_top_y + hour * cell_height
                 subcell_y1 = subcell_y0 + cell_height
+
                 for c_idx in range(len(self.timetable.classrooms)):
                     subcell_x0 = left_label_width + c_idx * col_width
                     subcell_x1 = subcell_x0 + col_width
@@ -293,23 +350,25 @@ class TimetableApp(tk.Tk):
                         self.canvas.create_text(
                             (subcell_x0 + subcell_x1) / 2,
                             (subcell_y0 + subcell_y1) / 2,
-                            text="FREE", font=("Arial", 7)
+                            text="FREE", font=("Arial", font_size - 1)
                         )
                     else:
                         distinct_courses = set(ci for (ci, _) in collisions)
                         if len(distinct_courses) == 1:
-                            # One distinct course => color cell
+                            # Exactly one distinct course => fill cell with that course's color
                             (course_idx, lab_flag) = collisions[0]
-                            fill_color = color_map[course_idx]  # <-- reusing the stable color map
+                            fill_color = color_map[course_idx]
                             self.canvas.create_rectangle(
                                 subcell_x0, subcell_y0, subcell_x1, subcell_y1,
                                 fill=fill_color, outline="black"
                             )
 
+                            # Possibly multiple lines if multiple collisions with the same course
                             lines = []
                             for (ci, lb) in collisions:
                                 crs_obj = self.timetable.courses[ci]
-                                line_txt = f"{crs_obj.name} (ID: {ci})"
+                                # Display course + professor
+                                line_txt = f"{crs_obj.name} Prof. {crs_obj.professor.name}"
                                 if lb:
                                     line_txt = "Lab: " + line_txt
                                 lines.append(line_txt)
@@ -319,19 +378,20 @@ class TimetableApp(tk.Tk):
                                 (subcell_x0 + subcell_x1) / 2,
                                 (subcell_y0 + subcell_y1) / 2,
                                 text=text_content,
-                                font=("Arial", 7),
+                                font=("Arial", font_size - 1),
                                 width=col_width - 10
                             )
                         else:
-                            # Collision => gray
+                            # A real collision => fill black, white text
                             self.canvas.create_rectangle(
                                 subcell_x0, subcell_y0, subcell_x1, subcell_y1,
-                                fill="gray", outline="black"
+                                fill="black", outline="black"
                             )
                             lines = []
                             for (ci, lb) in collisions:
                                 crs_obj = self.timetable.courses[ci]
-                                line_txt = f"{crs_obj.name} (ID: {ci})"
+                                # Show course + professor
+                                line_txt = f"{crs_obj.name} Prof. {crs_obj.professor.name}"
                                 if lb:
                                     line_txt = "Lab: " + line_txt
                                 lines.append(line_txt)
@@ -341,10 +401,12 @@ class TimetableApp(tk.Tk):
                                 subcell_x0 + 5, subcell_y0 + 5,
                                 anchor="nw",
                                 text=text_content,
-                                font=("Arial", 7),
+                                font=("Arial", font_size - 1),
+                                fill="white",
                                 width=col_width - 10
                             )
 
+        # 5) Update scrolling region
         self.canvas.configure(scrollregion=(0, 0, total_width, total_height))
 
     def add_professor(self):
@@ -663,16 +725,16 @@ class TimetableApp(tk.Tk):
             return self._stop_ga  # True if user pressed Stop
 
         def worker():
-            if(self.timetable == None):
+            if self.timetable is None:
                 agents = [Timetable(self.classrooms, self.courses) for _ in range(100)]
             else:
                 agents = [self.timetable for _ in range(100)]
             best_timetable, best_fitness = GA.run(
                 agents,
-                generations=1000,
+                generations=3000,
                 mutation_rate=0.9,
-                k=40,
-                m=40,
+                k=60,
+                m=60,
                 update_callback=update_progress,
                 stop_check=stop_check
             )
@@ -687,6 +749,8 @@ class TimetableApp(tk.Tk):
 
         t = threading.Thread(target=worker, daemon=True)
         t.start()
+        # Start polling the file every 3 seconds
+        self.after(1000, self.poll_best_agent_file)
 
 if __name__ == "__main__":
     app = TimetableApp()

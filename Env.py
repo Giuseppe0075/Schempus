@@ -46,7 +46,6 @@ class Course:
     def __str__(self):
         return f"{self.name} by {self.professor}"
 
-
 class Classroom:
     """This class represents a classroom in a university"""
     def __init__(self, name, capacity, is_lab = False, subject = None):
