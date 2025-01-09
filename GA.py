@@ -48,7 +48,7 @@ def run(
                 f.write(str(best_agent))
             if best_fit == 0:
                 if update_callback:
-                    update_callback(i, generations)
+                    update_callback(i, generations, best_fit)
                 return best_agent, 0
         best_agents.append(best_agent)
         best_fits.append(best_fit)
@@ -77,7 +77,7 @@ def run(
         agents = new_agents
         # Update progress after each generation
         if update_callback:
-            update_callback(i, generations)
+            update_callback(i, generations, best_fit)
 
     return best_agent, best_fit# , best_fits
 

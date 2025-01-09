@@ -716,7 +716,9 @@ class TimetableApp(tk.Tk):
         stop_button = tk.Button(progress_window, text="Stop", command=on_stop)
         stop_button.pack(pady=10)
 
-        def update_progress(current_gen, total_gen):
+        def update_progress(current_gen, total_gen, best_fitness):
+            # Update the label with the current best fitness
+            label.config(text=f"Calculating Timetable... Best fitness: {int(best_fitness)}")
             progress_percent = (current_gen / total_gen) * 100
             # Update the progress bar in the main thread
             self.after(0, lambda: progress_bar.config(value=progress_percent))
