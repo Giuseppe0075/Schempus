@@ -14,6 +14,7 @@ def run(
     mutation_rate=0.9,
     k=20,
     m=20,
+    elitism = 7,
     update_callback=None,
     stop_check=None
 ):
@@ -37,22 +38,22 @@ def run(
         agents, fits = selection(agents, k, m)
 
         # Find the best agent
-        for agent, fit_val in zip(agents, fits):
-            if fit_val < best_fit:
-                best_agent = copy.deepcopy(agent)
-                best_fit = fit_val
-                # When you find a new best_agent
-                with open("best_agent.pkl", "wb") as f:
-                    pickle.dump(best_agent, f)
-                with open("best_agent.txt", "w") as f:
-                    f.write(str(best_agent))
-                if best_fit == 0:
-                    if update_callback:
-                        update_callback(i, generations)
-                    return best_agent, 0
+        if fits[0] < best_fit:
+            best_agent = copy.deepcopy(agents[0])
+            best_fit = fits[0]
+            # When you find a new best_agent
+            with open("best_agent.pkl", "wb") as f:
+                pickle.dump(best_agent, f)
+            with open("best_agent.txt", "w") as f:
+                f.write(str(best_agent))
+            if best_fit == 0:
+                if update_callback:
+                    update_callback(i, generations)
+                return best_agent, 0
         best_agents.append(best_agent)
         best_fits.append(best_fit)
         new_agents = []
+        new_agents.extend(copy.deepcopy(agents[:elitism]))
 
         # Crossover
         while len(new_agents) < n_agents:
@@ -74,12 +75,11 @@ def run(
                 mutation(ag, day_mutation, class_mutation, hour_mutation)
 
         agents = new_agents
-        agents.append(best_agent)
         # Update progress after each generation
         if update_callback:
             update_callback(i, generations)
 
-    return best_agent, best_fit , best_fits
+    return best_agent, best_fit# , best_fits
 
 def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation):
     # Select a random lesson
@@ -129,13 +129,13 @@ def crossover(agent1: Timetable, agent2: Timetable):
     child1 = copy.deepcopy(agent1)
     child2 = copy.deepcopy(agent2)
 
-    # Swap 2 courses between the agents
-    i = rd.randint(0, len(child1.courses) - 1)
-    for j in range(len(child1.timetable[i])):
-        c1_lesson = child1.timetable[i][j]
-        c2_lesson = child2.timetable[i][j]
-        child1.timetable[i][j] = [c2_lesson[0], c2_lesson[1], c2_lesson[2], c1_lesson[3]]
-        child2.timetable[i][j] = [c1_lesson[0], c1_lesson[1], c1_lesson[2], c2_lesson[3]]
+    # Swap courses from a random index
+    for i in range(rd.randint(0,len(child1.timetable)),len(child1.timetable)):
+        for j in range(len(child1.timetable[i])):
+            c1_lesson = child1.timetable[i][j]
+            c2_lesson = child2.timetable[i][j]
+            child1.timetable[i][j] = [c2_lesson[0], c2_lesson[1], c2_lesson[2], c1_lesson[3]]
+            child2.timetable[i][j] = [c1_lesson[0], c1_lesson[1], c1_lesson[2], c2_lesson[3]]
 
     return child1, child2
 
@@ -169,7 +169,8 @@ def selection(agents: list, k, m):
         min_idx = selected_fits.index(min_fit)
         winners.append(selected_agents[min_idx])
         winners_fits.append(min_fit)
-
+    # Sort the winners by fitness
+    winners, winners_fits = zip(*sorted(zip(winners, winners_fits), key=lambda x: x[1]))
     return winners, winners_fits
 
 
@@ -183,7 +184,7 @@ def fitness(agent: Timetable):
     - daily distribution
     """
     collisions_weight = 60
-    conflicts_weight = 10
+    conflicts_weight = 60
     capacity_weight = 1
     week_distribution_weight = 30
     distribution_in_day_weight = 10
