@@ -1,0 +1,5 @@
+Mean Number of mutations (1): 141.97
+Mean Number of mutations (2): 832.49
+Mean Number of mutations (3): 2741.88
+Mean Number of mutations (4): 4495.35
+Mean Number of mutations (5): 5634.929999999999
