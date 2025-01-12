@@ -7,4 +7,4 @@ Mean Mutation Rate (6): 228.35999999999996
 Mean Mutation Rate (7): 192.06000000000003
 Mean Mutation Rate (8): 176.23999999999995
 Mean Mutation Rate (9): 118.41999999999996
-Mean Mutation Rate (10): 205.37999999999997
+Mean Mutation Rate (10): 111.49999999999993

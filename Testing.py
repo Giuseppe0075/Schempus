@@ -85,21 +85,23 @@ classrooms = [
 ]
 # End Example
 
-STRING = "k-m"
+STRING = "Number of mutations"
 
-def run_ga_test(_generations, mutation_rate, k, m):
+def run_ga_test(_generations, mutation_rate, k, m,  j, n_mutations):
     agents = [Timetable(classrooms, courses) for _ in range(100)]
     result, fitness, statistics = GA.run(agents,
                                          generations=_generations,
                                          mutation_rate=mutation_rate,
                                          k=k, m=m,
+                                         elitism=j,
+                                         n_mutations= n_mutations,
                                          )
     # Restituisco i due valori: fitness e l'array delle statistiche
     return fitness, statistics
 
 if __name__ == '__main__':
     # Numero di test
-    num_tests = 10
+    num_tests = 5
     # Numero di processi TOT da lanciare per ogni test
     num_processes = 10
     # Numero di processi massimi in parallelo
@@ -107,21 +109,21 @@ if __name__ == '__main__':
     # Numero di generazioni
     generations = 3000
 
-    # Pulisco il file dei risultati
-    with open('Testing_KandM/results.txt', 'w'):
-        pass
+    # # Pulisco il file dei risultati
+    # with open('TestingMutation3.0/', 'w'):
+    #     pass
 
     # Creo la pool con concurrency limitata a max_workers
     pool = multiprocessing.Pool(processes=max_workers)
 
-    for j in range(10, (num_tests + 1) * 10, 10):
+    for j in range(1, num_tests + 1):
         # Invio i job alla pool e mi salvo i riferimenti
         async_results = []
         for i in range(num_processes):
             async_results.append(
                 pool.apply_async(
                     run_ga_test,
-                    args=(generations, 0.9,j, j)
+                    args=(generations, 0.9, 60, 60, 0, j)
                 )
             )
 
@@ -147,14 +149,14 @@ if __name__ == '__main__':
         plt.grid(True)
         plt.xlim(0, generations-1)
         plt.ylim(0, 10000)
-        plt.savefig(f'Testing_KandM/{STRING}_{j}.png')
+        plt.savefig(f'TestingNMutations/{STRING}_{j}.png')
         plt.close()
 
         # Calcolo e salvo la media dei fitness
         valid_results = [r for r in results if r is not None]
         if valid_results:
             mean_value = sum(valid_results) / len(valid_results)
-            with open('Testing_KandM/results.txt', 'a') as f:
+            with open('TestingNMutations/results.txt', 'a') as f:
                 f.write(f"Mean {STRING} ({j}): {mean_value}\n")
 
     # Chiudo la pool

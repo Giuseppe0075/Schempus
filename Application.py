@@ -126,7 +126,6 @@ def toggle_subject_field(subject_combobox, is_lab_var):
         subject_combobox.set("")
         subject_combobox.configure(state="disabled")
 
-
 def _generate_course_colors(num_courses):
     """
     Generate a color map for each course index (0..num_courses-1).
@@ -733,7 +732,7 @@ class TimetableApp(tk.Tk):
                 agents = [self.timetable for _ in range(100)]
             best_timetable, best_fitness = GA.run(
                 agents,
-                generations=3000,
+                generations=1000,
                 mutation_rate=0.9,
                 k=60,
                 m=60,

@@ -14,7 +14,8 @@ def run(
     mutation_rate=0.9,
     k=20,
     m=20,
-    elitism = 7,
+    elitism = 0,
+    n_mutations = 1,
     update_callback=None,
     stop_check=None
 ):
@@ -71,15 +72,16 @@ def run(
 
         # Mutation
         for ag in new_agents:
-            if rd.random() < mutation_rate:
-                mutation(ag, day_mutation, class_mutation, hour_mutation)
+            for _ in range(n_mutations):
+                if rd.random() < mutation_rate:
+                    mutation(ag, day_mutation, class_mutation, hour_mutation)
 
         agents = new_agents
         # Update progress after each generation
         if update_callback:
             update_callback(i, generations, best_fit)
 
-    return best_agent, best_fit# , best_fits
+    return best_agent, best_fit , best_fits
 
 def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation):
     # Select a random lesson
@@ -90,7 +92,7 @@ def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation):
     # Mutate the lesson
     new_lesson = [
         (old_lesson[0] + rd.randint(-day_mutation, day_mutation)) % NUMBER_OF_DAYS,
-        (old_lesson[1] + rd.randint(-class_mutation, class_mutation)) % len(agent.classrooms),
+        (old_lesson[1] + rd.randint(-class_mutation, class_mutation)) % NUMBER_OF_CLASSES,
         (old_lesson[2] + rd.randint(-hour_mutation, hour_mutation)) % NUMBER_OF_HOURS,
         old_lesson[3]
     ]
@@ -209,7 +211,6 @@ def fitness(agent: Timetable):
     # -------------------------------------------------------------------
     def count_professor_conflicts():
         conflicts = 0
-        # professor_lessons[prof] = list of (day, hour) where they teach
         professor_lessons_map = {}
 
         for i, course in enumerate(all_courses):
@@ -241,7 +242,7 @@ def fitness(agent: Timetable):
                 if error > 0:
                     total_error += error
                 else:
-                    total_error -= error/100
+                    total_error -= round(error/100, 2)
         return total_error
 
     # -------------------------------------------------------------------

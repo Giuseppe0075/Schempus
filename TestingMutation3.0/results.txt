@@ -1,2 +1,3 @@
-Mean Mutation 2.0  generations: 451.4
-Mean Mutation 3.0  generations: 354.97
+Mean Mutation 1.0 (1): 369.0499999999999
+Mean Mutation 2.0 (1): 354.15999999999997
+Mean Mutation 3.0 (1): 164.52
