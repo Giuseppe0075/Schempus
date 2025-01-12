@@ -81,7 +81,7 @@ def run(
         if update_callback:
             update_callback(i, generations, best_fit)
 
-    return best_agent, best_fit , best_fits
+    return best_agent, best_fit #, best_fits
 
 def mutation(agent: Timetable, day_mutation, class_mutation, hour_mutation):
     # Select a random lesson
@@ -240,7 +240,7 @@ def fitness(agent: Timetable):
                 class_capacity = agent.classrooms[lesson[1]].capacity
                 error = course_students - class_capacity
                 if error > 0:
-                    total_error += error
+                    total_error += error * 3
                 else:
                     total_error -= round(error/100, 2)
         return total_error
@@ -336,5 +336,5 @@ def fitness(agent: Timetable):
         fit_day_dist +
         fit_lab_alloc
     )
-    print(f"fit: {total_fit} <- collisions: {fit_collisions}, professor conflicts: {fit_prof_conf}, capacity: {fit_capacity}, week distribution: {fit_week_dist}, day distribution: {fit_day_dist}, lab allocation: {fit_lab_alloc}")
+    # print(f"fit: {total_fit} <- collisions: {fit_collisions}, professor conflicts: {fit_prof_conf}, capacity: {fit_capacity}, week distribution: {fit_week_dist}, day distribution: {fit_day_dist}, lab allocation: {fit_lab_alloc}")
     return total_fit

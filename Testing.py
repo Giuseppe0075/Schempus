@@ -85,7 +85,7 @@ classrooms = [
 ]
 # End Example
 
-STRING = "Number of mutations"
+STRING = "Test"
 
 def run_ga_test(_generations, mutation_rate, k, m,  j, n_mutations):
     agents = [Timetable(classrooms, courses) for _ in range(100)]
@@ -156,7 +156,7 @@ if __name__ == '__main__':
         valid_results = [r for r in results if r is not None]
         if valid_results:
             mean_value = sum(valid_results) / len(valid_results)
-            with open('TestingNMutations/results.txt', 'a') as f:
+            with open('Statistics/TestingNMutations/results.txt', 'a') as f:
                 f.write(f"Mean {STRING} ({j}): {mean_value}\n")
 
     # Chiudo la pool
