@@ -3,6 +3,7 @@
 
 # Description
 Schempus is an application that uses adaptive genetic algorithms to create correct and optimized university's timetable.
+FIA_documentation.pdf documents the entire approach to the problem, explaining everything related to it.
 
 # Main Functionalities
 - Schedule of different courses in different classrooms and laboratories of an university.
