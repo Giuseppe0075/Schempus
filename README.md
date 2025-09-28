@@ -33,5 +33,5 @@ Follow the following steps in order to use the application:
 # Contacts
 - Author: Giuseppe Sica
 - Email: giuseppesica03@gmail.com
-- Linkedin:  https://www.linkedin.com/in/giuseppe-sica-789973230/
+- Linkedin:  https://www.linkedin.com/in/03-giuseppe-sica/
 - GitHub: @Giuseppe0075
